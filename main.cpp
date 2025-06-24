@@ -1,5 +1,6 @@
 #include <iostream>
 #include "lexer.h"
+#include "parser.h"
 
 int main() {
     std::string code = R"(
@@ -20,6 +21,17 @@ int main() {
 
     for (const auto& token : tokens) {
         std::cout << "Line " << token.line << ": " << token.lexeme << " (Type: " << static_cast<int>(token.type) << ")\n";
+    }
+
+    std::cout << "\n--- Parsing ---\n";
+    Parser parser(tokens);
+    auto expression = parser.parse();
+
+    if (expression) {
+        expression->print();
+        std::cout << std::endl;
+    } else {
+        std::cerr << "Parsing failed.\n";
     }
 
     return 0;
