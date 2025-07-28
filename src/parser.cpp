@@ -1,8 +1,11 @@
+
 #include "../include/parser.h"
 #include <iostream>
 #include <cstdlib>
+#include <unordered_map>
 
-// Parser constructor
+std::unordered_map<std::string, double> environment;
+
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), current(0) {}
 
 std::vector<std::unique_ptr<Stmt>> Parser::parse() {
@@ -70,6 +73,9 @@ std::unique_ptr<Expr> Parser::primary() {
     if (match({TokenType::NUMBER})) {
         return std::make_unique<LiteralExpr>(tokens[current - 1]);
     }
+    if (match({TokenType::IDENTIFIER})) {
+        return std::make_unique<VariableExpr>(tokens[current - 1]);
+    }
     return nullptr;
 }
 
@@ -107,10 +113,28 @@ bool Parser::isAtEnd() const {
     return peek().type == TokenType::EOF_TOKEN;
 }
 
-// ---- AST Printing ----
-
 void LiteralExpr::print() const {
-    std::cout << "Literal(" << value.lexeme << ")\n";
+    std::cout << "Literal(" << value.lexeme << ")";
+}
+
+double LiteralExpr::evaluate() const {
+    try {
+        return std::stod(value.lexeme);
+    } catch (...) {
+        return 0.0;
+    }
+}
+
+void VariableExpr::print() const {
+    std::cout << "Variable(" << name.lexeme << ")";
+}
+
+double VariableExpr::evaluate() const {
+    if (environment.count(name.lexeme)) {
+        return environment[name.lexeme];
+    }
+    std::cerr << "Runtime error: Undefined variable '" << name.lexeme << "'\n";
+    std::exit(1);
 }
 
 void BinaryExpr::print() const {
@@ -121,20 +145,9 @@ void BinaryExpr::print() const {
     std::cout << ")";
 }
 
-// ---- AST Evaluation ----
-
-double LiteralExpr::evaluate() const {
-    try {
-        return std::stod(value.lexeme);
-    } catch (...) {
-        return 0.0;
-    }
-}
-
 double BinaryExpr::evaluate() const {
     double leftVal = left->evaluate();
     double rightVal = right->evaluate();
-
     switch (op.type) {
         case TokenType::PLUS: return leftVal + rightVal;
         case TokenType::MINUS: return leftVal - rightVal;
@@ -144,16 +157,10 @@ double BinaryExpr::evaluate() const {
     }
 }
 
-// ---- Statement Execution ----
-
 void VarDecl::execute() const {
-    std::cout << "Declare " << name.lexeme << " = ";
-    if (initializer) {
-        std::cout << initializer->evaluate();
-    } else {
-        std::cout << "nil";
-    }
-    std::cout << std::endl;
+    double value = initializer ? initializer->evaluate() : 0.0;
+    environment[name.lexeme] = value;
+    std::cout << "Declare " << name.lexeme << " = " << value << std::endl;
 }
 
 void PrintStmt::execute() const {
