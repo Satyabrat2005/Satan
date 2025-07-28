@@ -60,32 +60,51 @@ Looks like Python. Performs like C++.
 
 # 🧱 Tech Stack
 LayerStack
+
+
 Language CoreC++20 + Flex/Bison + LLVM (future)
+
+
 Backend IRAST + Satan Bytecode (SVM planned)
+
+
 ML EngineBuilt on libtorch + Eigen + custom ops
+
 PlottingPowered by Vega-lite + SatanPlot
+
 Data I/OCSV/JSON Parsers, Columnar Engine
+
 GPU LayerCUDA, OpenCL
 
 # 🔮 Features (In Progress)
+
 📝 SatanScript: transpile to Python/JS/WASM
+
 🧪 SatanBook: interactive notebook like Jupyter
+
 ⚡ SatanCloud: deploy Satan models to edge/devices/cloud
+
 🧠 Neural module compiler (NMC) for real-time deployment
+
 🌐 satanpkg: official Satan package manager
 
 # 📦 Installation (Coming Soon)
 Cross-platform compiler & toolchain:
 
 🐧 Linux (Deb, AppImage)
+
 🪟 Windows (MSVC/MinGW)
+
 🍎 MacOS (brew)
 
 # Satan tools:
 
 satanc (CLI compiler)
+
 satanpkg (package manager)
+
 satan-repl (interactive shell)
+
 Satan aims to outperform Python by 6–8× in compute-intensive workflows.
 
 # 📣 Testimonials (Future Manifest 😎)
@@ -101,28 +120,44 @@ Satan aims to outperform Python by 6–8× in compute-intensive workflows.
 ```
 
 # 🌍 Roadmap
+
  Release satanc compiler
+ 
  Launch satanpkg registry and CLI
+ 
  VSCode extension for Satan
+ 
  SatanPlot + SatanGPU release
+ 
  Official docs and API reference
+ 
  Launch community tutorials & SatanBook
+ 
  Real-time deployment to Raspberry Pi & Jetson
 
 # 🛠️ Contributing
 We welcome contributors in:
 
+
 Compiler design / bytecode VM
+
 Flex/Bison parser optimization
+
 ML/Stats library development
+
 Performance testing & GPU backend
+
 Building satanpkg registry
 
 # To contribute:
 
+
 Fork & clone this repo
+
 Build with make or cmake
+
 Submit PRs via GitHub
+
 See CONTRIBUTING.md (coming soon)
 
 ## 🔗 Ecosystem Repositories
@@ -138,7 +173,9 @@ See CONTRIBUTING.md (coming soon)
 
 
 🧠 Built By
+
 Crafted with ❤️ by
+
 Satyabrat Sahu
 🚀 AI Engineer
 
