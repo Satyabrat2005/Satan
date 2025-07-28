@@ -6,14 +6,25 @@
 #include <unordered_map>
 
 enum class TokenType {
+    // Single-character tokens
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
-    COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
-    BANG, BANG_EQUAL,
-    EQUAL, EQUAL_EQUAL,
-    GREATER, GREATER_EQUAL,
-    LESS, LESS_EQUAL,
+    COMMA, DOT, SEMICOLON,
+    PLUS, MINUS, STAR, SLASH,
+    BANG, EQUAL,
+    LESS, GREATER,
+
+    // One or two character tokens
+    BANG_EQUAL, EQUAL_EQUAL,
+    LESS_EQUAL, GREATER_EQUAL,
+
+    // Literals
     IDENTIFIER, STRING, NUMBER,
-    LET, VAR, FUNC, IF, ELSE, FOR, WHILE, RETURN, SUMMON, TRUE, FALSE,
+
+    // Keywords
+    LET, VAR, FUNC, IF, ELSE, FOR, WHILE, RETURN, PRINT, TRUE, FALSE,
+    AND, OR, NOT,
+
+    // Special
     EOF_TOKEN,
     ERROR
 };
