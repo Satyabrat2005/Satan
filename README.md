@@ -1,99 +1,152 @@
-# Satan Language(under development)
+# 🔱 Satan Programming Language
 
-**Satan** is a modern programming language built in C++ and purpose-designed for Data Science and Machine Learning. Combining the performance of C++ with Python-like simplicity, Satan delivers a robust ecosystem of high-performance libraries and easy-to-read syntax — making data science and ML tasks faster and smoother than with Python or R.
-
----
-
-## 🚀 Why Choose Satan?
-
-- **⚡ Blazing Fast**  
-  Built on C++ for maximum speed and memory efficiency.
-
-- **🧠 AI-Ready**  
-  Modern ML workflows ready: tensor ops, training loops, full GPU compute.
-
-- **🛆 Rich Standard Library**  
-  Built-ins for data handling, matrix math, plotting, and model construction.
-
-- **✨ Pythonic Simplicity**  
-  Clear syntax, indentation-based, no semicolon headaches.
-
-- **🔄 R-like Statistical Power**  
-  Native support for statistical analysis and data manipulation workflows.
+Satan is a modern programming language designed specifically for blazing-fast Data Science and Machine Learning.  
+Crafted in C++ for performance, yet offering the elegance and clarity of Python, Satan empowers you to build intelligent systems at scale.
 
 ---
 
-## 📚 Key Features
+## 🚀 Why Satan?
 
-- **satan.data**  
-  DataFrames, CSV and JSON readers, flexible data ingestion.
-
-- **satan.nn**  
-  Build and train neural networks with concise, intuitive syntax.
-
-- **satan.stats**  
-  Full stack of stats: regression, distributions, hypothesis testing.
-
-- **satan.gpu**  
-  CUDA/OpenCL support for high-performance GPU computation.
-
-- **satan.plot**  
-  Beautiful plots and graphs with a single line.
+- ⚡️ Built on C++20 for maximum speed and zero-overhead abstractions.
+- 🧠 Designed for ML/AI from the ground up: training loops, tensor math, and GPU support.
+- 🪶 Pythonic syntax: easy to write, read, and debug.
+- 🔬 Statistical programming built-in: like R, but faster.
+- 🧵 Parallel, GPU, and async support baked into the language.
 
 ---
 
-## 🛠️ Installation (Coming Soon)
+## 🧠 Philosophy
 
-Satan is under active development.  
-A package manager & compiler (`satanc`) will be released for all platforms soon.
+Satan is built with these core principles:
+
+- 🧩 Modularity over complexity
+- ⚔️ Performance without sacrificing clarity
+- 🎯 AI-first: everything ML-ready out of the box
+- 🧬 Extensibility via modules (like python packages, but compiled and optimized)
 
 ---
 
-## 🔧 Example Usage
+## 🧪 Example Code
 
-import satan.nn
-import satan.data
+```bash
+let data = read_csv("iris.csv")
 
-data = read_csv("dataset.csv")
-model = Sequential(
+let model = Sequential(
 Dense(64, activation="relu"),
-Dense(1)
+Dense(3, activation="softmax")
 )
 
 model.train(data.X, data.y, epochs=100)
 
+if model.accuracy > 0.9 {
+print("Model trained successfully! 🚀")
+}
+```
 
----
+Looks like Python. Performs like C++.
 
-## 🧪 Performance
+# 📚 Core Libraries
+📁 satan.data → DataFrames, CSV, JSON, transformation pipelines
 
-| Language | Speed (Matrix Ops) | Ease of Use     | ML Focus     |
-|----------|--------------------|-----------------|--------------|
-| Satan    | 🚀🚀🚀             | ✅✅✅          | ✅✅✅        |
-| Python   | 🚀                | ✅✅✅          | ✅✅✅        |
-| R        | 🚀                | ✅✅            | ✅✅          |
+🧠 satan.nn → Deep learning API with layers, optimizers, and training loops
 
----
+📈 satan.stats → Statistical tests, regression, probability distributions
 
-## 🧠 Built By
+📊 satan.plot → Built-in plotting with simple commands
 
-Developed with ❤️ by **Satyabrat Sahu** under the VanCorp research division.
+⚙️ satan.gpu → Easy GPU acceleration (CUDA, OpenCL)
 
----
+⏱ satan.async → Async loops, promises, and parallel threads
 
-## 🌍 Roadmap
+# 🧱 Tech Stack
+LayerStack
+Language CoreC++20 + Flex/Bison + LLVM (future)
+Backend IRAST + Satan Bytecode (SVM planned)
+ML EngineBuilt on libtorch + Eigen + custom ops
+PlottingPowered by Vega-lite + SatanPlot
+Data I/OCSV/JSON Parsers, Columnar Engine
+GPU LayerCUDA, OpenCL
 
-- [ ] Release `satanc` compiler and package manager
-- [ ] Beta Linux, Windows, Mac distributions
-- [ ] Expand ecosystem: plotting, GPU, advanced ML libraries
-- [ ] Community documentation & tutorials
+# 🔮 Features (In Progress)
+📝 SatanScript: transpile to Python/JS/WASM
+🧪 SatanBook: interactive notebook like Jupyter
+⚡ SatanCloud: deploy Satan models to edge/devices/cloud
+🧠 Neural module compiler (NMC) for real-time deployment
+🌐 satanpkg: official Satan package manager
 
----
+# 📦 Installation (Coming Soon)
+Cross-platform compiler & toolchain:
 
-## 💬 Want to Collaborate?
+🐧 Linux (Deb, AppImage)
+🪟 Windows (MSVC/MinGW)
+🍎 MacOS (brew)
 
-Satan is open to contributors & researchers in systems programming and AI.
-Feel free to open an issue, drop a message, or connect on [LinkedIn]().
+# Satan tools:
 
----
+satanc (CLI compiler)
+satanpkg (package manager)
+satan-repl (interactive shell)
+Satan aims to outperform Python by 6–8× in compute-intensive workflows.
 
+# 📣 Testimonials (Future Manifest 😎)
+```
+“Satan makes Python look like a scripting toy.”
+— HackerNews (Probably)
+
+“Trained my model 10x faster using Satan. This language slaps.”
+— A Grateful ML Researcher
+
+“If C++ and Python had a GPU-powered baby, it would be Satan.”
+— You, after trying it
+```
+
+# 🌍 Roadmap
+ Release satanc compiler
+ Launch satanpkg registry and CLI
+ VSCode extension for Satan
+ SatanPlot + SatanGPU release
+ Official docs and API reference
+ Launch community tutorials & SatanBook
+ Real-time deployment to Raspberry Pi & Jetson
+
+# 🛠️ Contributing
+We welcome contributors in:
+
+Compiler design / bytecode VM
+Flex/Bison parser optimization
+ML/Stats library development
+Performance testing & GPU backend
+Building satanpkg registry
+
+# To contribute:
+
+Fork & clone this repo
+Build with make or cmake
+Submit PRs via GitHub
+See CONTRIBUTING.md (coming soon)
+
+## 🔗 Ecosystem Repositories
+
+| Repo               | Description                           |
+|--------------------|---------------------------------------|
+| satan-core         | Parser, lexer, interpreter backend    |
+| satan-stdlib       | Data, ML, Stats, GPU libraries        |
+| satan-docs         | Official documentation                |
+| satan-examples     | Snippets and beginner projects        |
+| satan-book         | Interactive REPL / notebook engine    |
+| satanpkg-registry  | Community module hosting              |
+
+
+🧠 Built By
+Crafted with ❤️ by
+Satyabrat Sahu
+🚀 AI Engineer
+
+💬 Join the Cult
+LinkedIn: Satyabrat Sahu
+
+
+Made for rebels.
+Built for performance.
+Named for power.
+Welcome to the dark side of programming. 🧠⚔️
