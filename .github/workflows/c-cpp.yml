@@ -1,0 +1,27 @@
+name: C++ Build & Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y g++ make
+
+    - name: Compile Satan project
+      run: |
+        mkdir -p build
+        g++ -std=c++17 -Iinclude tests/test_interpreter.cpp src/lexer.cpp src/parser.cpp src/interpreter.cpp -o build/test_interpreter
+
+    - name: Run tests
+      run: |
+        ./build/test_interpreter
