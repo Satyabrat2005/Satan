@@ -1,11 +1,7 @@
 #include "../include/parser.h"
+#include "../include/environment.h"
 #include <iostream>
 #include <cstdlib>
-#include <unordered_map>
-
-std::unordered_map<std::string, double> environment;
-
-// ---- Parser Implementation ----
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), current(0) {}
 
@@ -35,6 +31,7 @@ std::unique_ptr<Stmt> Parser::varDeclaration() {
 
 std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT})) return printStatement();
+    if (match({TokenType::IDENTIFIER}) && tokens[current - 1].lexeme == "assemble") return assembleStatement();
     return nullptr;
 }
 
@@ -42,6 +39,12 @@ std::unique_ptr<Stmt> Parser::printStatement() {
     std::unique_ptr<Expr> value = expression();
     consume(TokenType::SEMICOLON, "Expected ';' after value.");
     return std::make_unique<PrintStmt>(std::move(value));
+}
+
+std::unique_ptr<Stmt> Parser::assembleStatement() {
+    std::unique_ptr<Expr> value = expression();
+    consume(TokenType::SEMICOLON, "Expected ';' after value.");
+    return std::make_unique<AssembleStmt>(std::move(value));
 }
 
 std::unique_ptr<Expr> Parser::expression() {
@@ -118,7 +121,7 @@ void LiteralExpr::print() const {
     std::cout << "Literal(" << value.lexeme << ")";
 }
 
-double LiteralExpr::evaluate() const {
+double LiteralExpr::evaluate(Environment& env) const {
     try {
         return std::stod(value.lexeme);
     } catch (...) {
@@ -130,12 +133,13 @@ void VariableExpr::print() const {
     std::cout << "Variable(" << name.lexeme << ")";
 }
 
-double VariableExpr::evaluate() const {
-    if (environment.count(name.lexeme)) {
-        return environment[name.lexeme];
+double VariableExpr::evaluate(Environment& env) const {
+    try {
+        return env.get(name.lexeme);
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Runtime error: " << e.what() << "\n";
+        std::exit(1);
     }
-    std::cerr << "Runtime error: Undefined variable '" << name.lexeme << "'\n";
-    std::exit(1);
 }
 
 void BinaryExpr::print() const {
@@ -146,9 +150,9 @@ void BinaryExpr::print() const {
     std::cout << ")";
 }
 
-double BinaryExpr::evaluate() const {
-    double leftVal = left->evaluate();
-    double rightVal = right->evaluate();
+double BinaryExpr::evaluate(Environment& env) const {
+    double leftVal = left->evaluate(env);
+    double rightVal = right->evaluate(env);
     switch (op.type) {
         case TokenType::PLUS:  return leftVal + rightVal;
         case TokenType::MINUS: return leftVal - rightVal;
@@ -160,14 +164,20 @@ double BinaryExpr::evaluate() const {
 
 // ---- Statement Execution ----
 
-void VarDecl::execute() const {
-    double value = initializer ? initializer->evaluate() : 0.0;
-    environment[name.lexeme] = value;
+void VarDecl::execute(Environment& env) const {
+    double value = initializer ? initializer->evaluate(env) : 0.0;
+    env.define(name.lexeme, value);
     std::cout << "Declare " << name.lexeme << " = " << value << std::endl;
 }
 
-void PrintStmt::execute() const {
+void PrintStmt::execute(Environment& env) const {
     std::cout << "Print: ";
     expr->print();
-    std::cout << " => " << expr->evaluate() << std::endl;
+    std::cout << " => " << expr->evaluate(env) << std::endl;
+}
+
+void AssembleStmt::execute(Environment& env) const {
+    std::cout << "[Assembler] > ";
+    expr->print();
+    std::cout << " = " << expr->evaluate(env) << std::endl;
 }
