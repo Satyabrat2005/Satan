@@ -6,7 +6,12 @@
 Environment globalEnv;
 
 int main() {
-    std::string source = "let x = 5 + 3 * 2; print x;";
+    std::string source = R"(
+        let x = 10 + 2 * 3;
+        let y = x - 4;
+        print x;
+        print y;
+    )";
 
     Lexer lexer(source);
     std::vector<Token> tokens = lexer.scanTokens();
@@ -14,7 +19,7 @@ int main() {
     Parser parser(tokens);
     std::vector<std::unique_ptr<Stmt>> statements = parser.parse();
 
-    // Use global environment
+    // Execute each statement with environment
     for (const auto& stmt : statements) {
         stmt->execute(globalEnv);
     }
