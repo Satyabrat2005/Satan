@@ -1,24 +1,26 @@
-
 #ifndef PARSER_H
 #define PARSER_H
 
 #include "lexer.h"
+#include "environment.h"
 #include <memory>
 #include <vector>
 
+// ---- Expression Base ----
 class Expr {
 public:
     virtual ~Expr() = default;
     virtual void print() const = 0;
-    virtual double evaluate() const = 0;
+    virtual double evaluate(Environment& env) const = 0;
 };
 
+// ---- Expression Nodes ----
 class LiteralExpr : public Expr {
 public:
     Token value;
     explicit LiteralExpr(Token val) : value(std::move(val)) {}
     void print() const override;
-    double evaluate() const override;
+    double evaluate(Environment& env) const override;
 };
 
 class VariableExpr : public Expr {
@@ -26,7 +28,7 @@ public:
     Token name;
     explicit VariableExpr(Token n) : name(std::move(n)) {}
     void print() const override;
-    double evaluate() const override;
+    double evaluate(Environment& env) const override;
 };
 
 class BinaryExpr : public Expr {
@@ -39,15 +41,17 @@ public:
         : left(std::move(l)), op(std::move(o)), right(std::move(r)) {}
 
     void print() const override;
-    double evaluate() const override;
+    double evaluate(Environment& env) const override;
 };
 
+// ---- Statement Base ----
 class Stmt {
 public:
     virtual ~Stmt() = default;
-    virtual void execute() const = 0;
+    virtual void execute(Environment& env) const = 0;
 };
 
+// ---- Statement Nodes ----
 class VarDecl : public Stmt {
 public:
     Token name;
@@ -56,7 +60,7 @@ public:
     VarDecl(Token n, std::unique_ptr<Expr> init)
         : name(std::move(n)), initializer(std::move(init)) {}
 
-    void execute() const override;
+    void execute(Environment& env) const override;
 };
 
 class PrintStmt : public Stmt {
@@ -66,9 +70,17 @@ public:
     explicit PrintStmt(std::unique_ptr<Expr> e)
         : expr(std::move(e)) {}
 
-    void execute() const override;
+    void execute(Environment& env) const override;
 };
 
+class AssembleStmt : public Stmt {
+public:
+    std::unique_ptr<Expr> expr;
+    explicit AssembleStmt(std::unique_ptr<Expr> e) : expr(std::move(e)) {}
+    void execute(Environment& env) const override;
+};
+
+// ---- Parser ----
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
@@ -82,6 +94,7 @@ private:
     std::unique_ptr<Stmt> varDeclaration();
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
+    std::unique_ptr<Stmt> assembleStatement();
 
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> term();
