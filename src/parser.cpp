@@ -1,10 +1,11 @@
-
 #include "../include/parser.h"
 #include <iostream>
 #include <cstdlib>
 #include <unordered_map>
 
 std::unordered_map<std::string, double> environment;
+
+// ---- Parser Implementation ----
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), current(0) {}
 
@@ -25,11 +26,9 @@ std::unique_ptr<Stmt> Parser::declaration() {
 std::unique_ptr<Stmt> Parser::varDeclaration() {
     Token name = consume(TokenType::IDENTIFIER, "Expected variable name.");
     std::unique_ptr<Expr> initializer;
-
     if (match({TokenType::EQUAL})) {
         initializer = expression();
     }
-
     consume(TokenType::SEMICOLON, "Expected ';' after variable declaration.");
     return std::make_unique<VarDecl>(name, std::move(initializer));
 }
@@ -113,6 +112,8 @@ bool Parser::isAtEnd() const {
     return peek().type == TokenType::EOF_TOKEN;
 }
 
+// ---- Expression AST ----
+
 void LiteralExpr::print() const {
     std::cout << "Literal(" << value.lexeme << ")";
 }
@@ -149,13 +150,15 @@ double BinaryExpr::evaluate() const {
     double leftVal = left->evaluate();
     double rightVal = right->evaluate();
     switch (op.type) {
-        case TokenType::PLUS: return leftVal + rightVal;
+        case TokenType::PLUS:  return leftVal + rightVal;
         case TokenType::MINUS: return leftVal - rightVal;
-        case TokenType::STAR: return leftVal * rightVal;
+        case TokenType::STAR:  return leftVal * rightVal;
         case TokenType::SLASH: return rightVal != 0 ? leftVal / rightVal : 0;
         default: return 0;
     }
 }
+
+// ---- Statement Execution ----
 
 void VarDecl::execute() const {
     double value = initializer ? initializer->evaluate() : 0.0;
