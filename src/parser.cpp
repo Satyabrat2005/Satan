@@ -33,21 +33,53 @@ std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT})) return printStatement();
     if (match({TokenType::ASSEMBLE})) return assembleStatement();
     if (match({TokenType::IF})) return ifStatement();
-    return nullptr;
+    if (match({TokenType::LEFT_BRACE})) return parseBlock();
+    return expressionStatement();
+}
+
+
+std::unique_ptr<Stmt> Parser::expressionStatement() {
+    auto expr = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+    return std::make_unique<ExprStmt>(std::move(expr));
 }
 
 std::unique_ptr<Stmt> Parser::ifStatement() {
-    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
-    auto condition = expression();
-    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");      // Expect '('
+    auto condition = expression();                                 
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition."); // Expect ')'
 
-    auto thenBranch = statement();
+    std::unique_ptr<Stmt> thenBranch;
+    if (match({TokenType::LEFT_BRACE})) {
+        thenBranch = parseBlock();  
+    } else {
+        thenBranch = statement();   
+    }
+
     std::unique_ptr<Stmt> elseBranch = nullptr;
     if (match({TokenType::ELSE})) {
-        elseBranch = statement();
+        if (match({TokenType::LEFT_BRACE})) {
+            elseBranch = parseBlock();
+        } else {
+            elseBranch = statement();
+        }
     }
+
     return std::make_unique<IfStmt>(std::move(condition), std::move(thenBranch), std::move(elseBranch));
 }
+
+std::unique_ptr<Stmt> Parser::parseBlock() {
+    std::vector<std::unique_ptr<Stmt>> statements;
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        statements.push_back(declaration());
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return std::make_unique<BlockStmt>(std::move(statements));
+}
+
+
 
 
 std::unique_ptr<Stmt> Parser::assembleStatement() {
@@ -121,10 +153,11 @@ Token Parser::peek() const {
 }
 
 Token Parser::consume(TokenType type, const std::string& message) {
+    std::cout << "Expecting token: " << static_cast<int>(type) << ", current: " << static_cast<int>(peek().type) << "\n";
     if (check(type)) return advance();
-    std::cerr << "Parser error: " << message << "\n";
-    std::exit(1);
+    throw std::runtime_error("Parser error: " + message);
 }
+
 
 bool Parser::isAtEnd() const {
     return peek().type == TokenType::EOF_TOKEN;
