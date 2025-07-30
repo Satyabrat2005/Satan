@@ -19,6 +19,10 @@ int main() {
     Lexer lexer(source);
     auto tokens = lexer.scanTokens();
 
+    for (const auto& token : tokens) {
+    std::cout << "Token: " << static_cast<int>(token.type) << " — '" << token.lexeme << "'\n";
+}
+
     Parser parser(tokens);
     auto statements = parser.parse();
 
