@@ -163,7 +163,7 @@ void Lexer::identifier() {
     if (keyword != keywords.end()) {
         addToken(keyword->second);
     } else {
-        tokens.emplace_back(TokenType::IDENTIFIER, text, line);
+        addToken(TokenType::IDENTIFIER);
     }
 }
 
