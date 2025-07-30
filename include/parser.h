@@ -63,6 +63,14 @@ public:
     void execute(Environment& env) const override;
 };
 
+class AssembleStmt : public Stmt {
+public:
+    std::unique_ptr<Expr> expr;
+    explicit AssembleStmt(std::unique_ptr<Expr> e) : expr(std::move(e)) {}
+    void execute(Environment& env) const override;
+};
+
+
 class PrintStmt : public Stmt {
 public:
     std::unique_ptr<Expr> expr;
