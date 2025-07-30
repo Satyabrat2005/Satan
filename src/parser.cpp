@@ -29,11 +29,12 @@ std::unique_ptr<Stmt> Parser::varDeclaration() {
     return std::make_unique<VarDecl>(name, std::move(initializer));
 }
 
-std::unique_ptr<Stmt> Parser::statement() {
-    if (match({TokenType::PRINT})) return printStatement();
-    if (match({TokenType::IDENTIFIER}) && tokens[current - 1].lexeme == "assemble") return assembleStatement();
-    return nullptr;
+std::unique_ptr<Stmt> Parser::assembleStatement() {
+    std::unique_ptr<Expr> expr = expression();
+    consume(TokenType::SEMICOLON, "Expected ';' after assemble expression.");
+    return std::make_unique<AssembleStmt>(std::move(expr));
 }
+
 
 std::unique_ptr<Stmt> Parser::printStatement() {
     std::unique_ptr<Expr> value = expression();
