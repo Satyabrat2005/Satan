@@ -70,7 +70,6 @@ public:
     void execute(Environment& env) const override;
 };
 
-
 class PrintStmt : public Stmt {
 public:
     std::unique_ptr<Expr> expr;
@@ -81,10 +80,16 @@ public:
     void execute(Environment& env) const override;
 };
 
-class AssembleStmt : public Stmt {
+
+class IfStmt : public Stmt {
 public:
-    std::unique_ptr<Expr> expr;
-    explicit AssembleStmt(std::unique_ptr<Expr> e) : expr(std::move(e)) {}
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Stmt> thenBranch;
+    std::unique_ptr<Stmt> elseBranch;
+
+    IfStmt(std::unique_ptr<Expr> cond, std::unique_ptr<Stmt> thenB, std::unique_ptr<Stmt> elseB)
+        : condition(std::move(cond)), thenBranch(std::move(thenB)), elseBranch(std::move(elseB)) {}
+
     void execute(Environment& env) const override;
 };
 
@@ -103,6 +108,7 @@ private:
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
+    std::unique_ptr<Stmt> ifStatement();
 
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> term();
