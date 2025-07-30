@@ -1,27 +1,30 @@
 #include "../include/lexer.h"
 #include "../include/parser.h"
 #include "../include/environment.h"
+#include <fstream>
+#include <sstream>
 #include <iostream>
 
-Environment globalEnv;
-
 int main() {
-    std::string source = R"(
-        let x = 10 + 2 * 3;
-        let y = x - 4;
-        print x;
-        print y;
-    )";
+    std::ifstream input("tests/test_if.satan");
+    if (!input.is_open()) {
+        std::cerr << "Failed to open test_if.satan\n";
+        return 1;
+    }
+
+    std::stringstream buffer;
+    buffer << input.rdbuf();
+    std::string source = buffer.str();
 
     Lexer lexer(source);
-    std::vector<Token> tokens = lexer.scanTokens();
+    auto tokens = lexer.scanTokens();
 
     Parser parser(tokens);
-    std::vector<std::unique_ptr<Stmt>> statements = parser.parse();
+    auto statements = parser.parse();
 
-    // Execute each statement with environment
+    Environment env;
     for (const auto& stmt : statements) {
-        stmt->execute(globalEnv);
+        stmt->execute(env);
     }
 
     return 0;
