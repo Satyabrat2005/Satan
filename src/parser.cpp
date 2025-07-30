@@ -29,23 +29,22 @@ std::unique_ptr<Stmt> Parser::varDeclaration() {
     return std::make_unique<VarDecl>(name, std::move(initializer));
 }
 
-std::unique_ptr<Stmt> Parser::assembleStatement() {
-    std::unique_ptr<Expr> expr = expression();
-    consume(TokenType::SEMICOLON, "Expected ';' after assemble expression.");
-    return std::make_unique<AssembleStmt>(std::move(expr));
+std::unique_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::PRINT})) return printStatement();
+    if (match({TokenType::ASSEMBLE})) return assembleStatement();
+    return nullptr;
 }
 
+std::unique_ptr<Stmt> Parser::assembleStatement() {
+    std::unique_ptr<Expr> value = expression();
+    consume(TokenType::SEMICOLON, "Expected ';' after assemble expression.");
+    return std::make_unique<AssembleStmt>(std::move(value));
+}
 
 std::unique_ptr<Stmt> Parser::printStatement() {
     std::unique_ptr<Expr> value = expression();
     consume(TokenType::SEMICOLON, "Expected ';' after value.");
     return std::make_unique<PrintStmt>(std::move(value));
-}
-
-std::unique_ptr<Stmt> Parser::assembleStatement() {
-    std::unique_ptr<Expr> value = expression();
-    consume(TokenType::SEMICOLON, "Expected ';' after value.");
-    return std::make_unique<AssembleStmt>(std::move(value));
 }
 
 std::unique_ptr<Expr> Parser::expression() {
@@ -178,7 +177,7 @@ void PrintStmt::execute(Environment& env) const {
 }
 
 void AssembleStmt::execute(Environment& env) const {
-    std::cout << "[Assembler] > ";
+    std::cout << "[Assembler] ";
     expr->print();
-    std::cout << " = " << expr->evaluate(env) << std::endl;
+    std::cout << " => " << expr->evaluate(env) << std::endl;
 }
