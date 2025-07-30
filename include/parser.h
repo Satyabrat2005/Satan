@@ -93,6 +93,32 @@ public:
     void execute(Environment& env) const override;
 };
 
+class BlockStmt : public Stmt {
+public:
+    std::vector<std::unique_ptr<Stmt>> statements;
+    explicit BlockStmt(std::vector<std::unique_ptr<Stmt>> stmts)
+        : statements(std::move(stmts)) {}
+
+    void execute(Environment& env) const override {
+        Environment blockEnv = env;  // or a scoped Environment if supported
+        for (const auto& stmt : statements) {
+            stmt->execute(blockEnv);
+        }
+    }
+};
+
+class ExprStmt : public Stmt {
+public:
+    std::unique_ptr<Expr> expr;
+
+    explicit ExprStmt(std::unique_ptr<Expr> e)
+        : expr(std::move(e)) {}
+
+    void execute(Environment& env) const override {
+        expr->evaluate(env);  // optionally do something with result
+    }
+};
+
 // ---- Parser ----
 class Parser {
 public:
@@ -109,6 +135,9 @@ private:
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
     std::unique_ptr<Stmt> ifStatement();
+ 
+    std::unique_ptr<Stmt> parseBlock(); 
+    std::unique_ptr<Stmt> expressionStatement();
 
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> term();
