@@ -32,8 +32,23 @@ std::unique_ptr<Stmt> Parser::varDeclaration() {
 std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT})) return printStatement();
     if (match({TokenType::ASSEMBLE})) return assembleStatement();
+    if (match({TokenType::IF})) return ifStatement();
     return nullptr;
 }
+
+std::unique_ptr<Stmt> Parser::ifStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+    auto condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+
+    auto thenBranch = statement();
+    std::unique_ptr<Stmt> elseBranch = nullptr;
+    if (match({TokenType::ELSE})) {
+        elseBranch = statement();
+    }
+    return std::make_unique<IfStmt>(std::move(condition), std::move(thenBranch), std::move(elseBranch));
+}
+
 
 std::unique_ptr<Stmt> Parser::assembleStatement() {
     std::unique_ptr<Expr> value = expression();
@@ -180,4 +195,12 @@ void AssembleStmt::execute(Environment& env) const {
     std::cout << "[Assembler] ";
     expr->print();
     std::cout << " => " << expr->evaluate(env) << std::endl;
+}
+
+void IfStmt::execute(Environment& env) const {
+    if (condition->evaluate(env)) {
+        thenBranch->execute(env);
+    } else if (elseBranch) {
+        elseBranch->execute(env);
+    }
 }
