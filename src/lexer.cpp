@@ -10,20 +10,21 @@ Token::Token(TokenType t, std::string lex, int ln)
 Lexer::Lexer(std::string src)
     : source(std::move(src)), start(0), current(0), line(1) {
     keywords = {
-    {"let", TokenType::LET},
-    {"var", TokenType::VAR},
-    {"func", TokenType::FUNC},
-    {"if", TokenType::IF},
-    {"else", TokenType::ELSE},
-    {"for", TokenType::FOR},
-    {"while", TokenType::WHILE},
-    {"return", TokenType::RETURN},
-    {"true", TokenType::TRUE},
-    {"false", TokenType::FALSE},
-    {"print", TokenType::PRINT},
-    {"and", TokenType::AND},
-    {"or", TokenType::OR},
-    {"not", TokenType::NOT}
+        {"let", TokenType::LET},
+        {"var", TokenType::VAR},
+        {"func", TokenType::FUNC},
+        {"if", TokenType::IF},
+        {"else", TokenType::ELSE},
+        {"for", TokenType::FOR},
+        {"while", TokenType::WHILE},
+        {"return", TokenType::RETURN},
+        {"true", TokenType::TRUE},
+        {"false", TokenType::FALSE},
+        {"print", TokenType::PRINT},
+        {"and", TokenType::AND},
+        {"or", TokenType::OR},
+        {"not", TokenType::NOT},
+        {"assemble", TokenType::ASSEMBLE}
     };
 }
 
