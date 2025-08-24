@@ -24,15 +24,19 @@ int main() {
     }
 
     std::cout << "\n--- Parsing ---\n";
-    Parser parser(tokens);
-    auto expression = parser.parse();
+    auto statements = parser.parse();
 
-    if (expression) {
-        expression->print();
-        std::cout << std::endl;
+    if (!statements.empty()) {
+        for (const auto& stmt : statements) {
+            if (stmt) {
+                stmt->print();
+                std::cout << std::endl;
+            }
+        }
     } else {
         std::cerr << "Parsing failed.\n";
     }
+
 
     return 0;
 }
