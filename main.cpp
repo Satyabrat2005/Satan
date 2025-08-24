@@ -24,7 +24,7 @@ int main() {
     }
 
     std::cout << "\n--- Parsing ---\n";
-    auto statements = parser.parse();
+    auto statements = Parser.parse();
 
     if (!statements.empty()) {
         for (const auto& stmt : statements) {
