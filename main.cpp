@@ -25,16 +25,17 @@ int main() {
     }
 
     std::cout << "\n--- Parsing ---\n";
-    Parser parser(tokens);                   // create parser instance
-    auto statements = parser.parse();        // call member function
+    Parser parser(tokens);
+    auto statements = parser.parse();
+
+    Environment env;
 
     if (!statements.empty()) {
         for (const auto& stmt : statements) {
-            stmt->execute(env);  // or stmt->print() if you have print
+            stmt->execute(env);
         }
     } else {
         std::cerr << "Parsing failed.\n";
     }
-
     return 0;
 }
