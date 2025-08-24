@@ -16,27 +16,25 @@ int main() {
         }
     )";
 
-    Lexer lexer(code);
+   Lexer lexer(code);
     auto tokens = lexer.scanTokens();
 
     for (const auto& token : tokens) {
-        std::cout << "Line " << token.line << ": " << token.lexeme << " (Type: " << static_cast<int>(token.type) << ")\n";
+        std::cout << "Line " << token.line << ": " << token.lexeme
+                << " (Type: " << static_cast<int>(token.type) << ")\n";
     }
 
     std::cout << "\n--- Parsing ---\n";
-    auto statements = Parser.parse();
+    Parser parser(tokens);                   // create parser instance
+    auto statements = parser.parse();        // call member function
 
     if (!statements.empty()) {
         for (const auto& stmt : statements) {
-            if (stmt) {
-                stmt->print();
-                std::cout << std::endl;
-            }
+            stmt->execute(env);  // or stmt->print() if you have print
         }
     } else {
         std::cerr << "Parsing failed.\n";
     }
-
 
     return 0;
 }
