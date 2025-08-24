@@ -169,7 +169,7 @@ void LiteralExpr::print() const {
     std::cout << "Literal(" << value.lexeme << ")";
 }
 
-double LiteralExpr::evaluate(Environment& env) const {
+double LiteralExpr::evaluate(Environment&) const {
     try {
         return std::stod(value.lexeme);
     } catch (...) {
