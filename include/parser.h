@@ -134,16 +134,19 @@ private:
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
-    std::unique_ptr<Stmt> ifStatement();
- 
-    std::unique_ptr<Stmt> parseBlock(); 
+    std::unique_ptr<Stmt> ifStatement();    
+
+    std::unique_ptr<Stmt> parseBlock();
     std::unique_ptr<Stmt> expressionStatement();
 
     std::unique_ptr<Expr> expression();
+    std::unique_ptr<Expr> equality();    
+    std::unique_ptr<Expr> comparison();   
     std::unique_ptr<Expr> term();
     std::unique_ptr<Expr> factor();
     std::unique_ptr<Expr> primary();
 
+    // ---- Helpers ----
     Token advance();
     bool match(std::initializer_list<TokenType> types);
     bool check(TokenType type) const;
@@ -151,5 +154,4 @@ private:
     Token consume(TokenType type, const std::string& message);
     bool isAtEnd() const;
 };
-
-#endif
+#endif 
