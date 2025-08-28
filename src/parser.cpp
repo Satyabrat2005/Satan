@@ -37,7 +37,6 @@ std::unique_ptr<Stmt> Parser::statement() {
     return expressionStatement();
 }
 
-
 std::unique_ptr<Stmt> Parser::expressionStatement() {
     auto expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after expression.");
@@ -45,15 +44,15 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
 }
 
 std::unique_ptr<Stmt> Parser::ifStatement() {
-    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");      // Expect '('
-    auto condition = expression();                                 
-    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition."); // Expect ')'
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+    auto condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
 
     std::unique_ptr<Stmt> thenBranch;
     if (match({TokenType::LEFT_BRACE})) {
-        thenBranch = parseBlock();  
+        thenBranch = parseBlock();
     } else {
-        thenBranch = statement();   
+        thenBranch = statement();
     }
 
     std::unique_ptr<Stmt> elseBranch = nullptr;
@@ -70,17 +69,12 @@ std::unique_ptr<Stmt> Parser::ifStatement() {
 
 std::unique_ptr<Stmt> Parser::parseBlock() {
     std::vector<std::unique_ptr<Stmt>> statements;
-
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         statements.push_back(declaration());
     }
-
     consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
     return std::make_unique<BlockStmt>(std::move(statements));
 }
-
-
-
 
 std::unique_ptr<Stmt> Parser::assembleStatement() {
     std::unique_ptr<Expr> value = expression();
@@ -94,8 +88,30 @@ std::unique_ptr<Stmt> Parser::printStatement() {
     return std::make_unique<PrintStmt>(std::move(value));
 }
 
+//Expression Parsing
+
 std::unique_ptr<Expr> Parser::expression() {
-    return term();
+    return equality();
+}
+
+std::unique_ptr<Expr> Parser::equality() {
+    auto expr = comparison();
+    while (match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL})) {
+        Token op = tokens[current - 1];
+        auto right = comparison();
+        expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::comparison() {
+    auto expr = term();
+    while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL})) {
+        Token op = tokens[current - 1];
+        auto right = term();
+        expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
 }
 
 std::unique_ptr<Expr> Parser::term() {
@@ -122,11 +138,17 @@ std::unique_ptr<Expr> Parser::primary() {
     if (match({TokenType::NUMBER})) {
         return std::make_unique<LiteralExpr>(tokens[current - 1]);
     }
+    if (match({TokenType::STRING})) {
+        return std::make_unique<LiteralExpr>(tokens[current - 1]);
+    }
     if (match({TokenType::IDENTIFIER})) {
         return std::make_unique<VariableExpr>(tokens[current - 1]);
     }
     return nullptr;
 }
+
+
+//Parser Utilities
 
 bool Parser::match(std::initializer_list<TokenType> types) {
     for (TokenType type : types) {
@@ -153,17 +175,17 @@ Token Parser::peek() const {
 }
 
 Token Parser::consume(TokenType type, const std::string& message) {
-    std::cout << "Expecting token: " << static_cast<int>(type) << ", current: " << static_cast<int>(peek().type) << "\n";
+    std::cout << "Expecting token: " << static_cast<int>(type)
+              << ", current: " << static_cast<int>(peek().type) << "\n";
     if (check(type)) return advance();
     throw std::runtime_error("Parser error: " + message);
 }
-
 
 bool Parser::isAtEnd() const {
     return peek().type == TokenType::EOF_TOKEN;
 }
 
-// ---- Expression AST ----
+// Expression AST
 
 void LiteralExpr::print() const {
     std::cout << "Literal(" << value.lexeme << ")";
@@ -201,16 +223,23 @@ void BinaryExpr::print() const {
 double BinaryExpr::evaluate(Environment& env) const {
     double leftVal = left->evaluate(env);
     double rightVal = right->evaluate(env);
+
     switch (op.type) {
         case TokenType::PLUS:  return leftVal + rightVal;
         case TokenType::MINUS: return leftVal - rightVal;
         case TokenType::STAR:  return leftVal * rightVal;
         case TokenType::SLASH: return rightVal != 0 ? leftVal / rightVal : 0;
+        case TokenType::GREATER:       return leftVal > rightVal ? 1.0 : 0.0;
+        case TokenType::GREATER_EQUAL: return leftVal >= rightVal ? 1.0 : 0.0;
+        case TokenType::LESS:          return leftVal < rightVal ? 1.0 : 0.0;
+        case TokenType::LESS_EQUAL:    return leftVal <= rightVal ? 1.0 : 0.0;
+        case TokenType::EQUAL_EQUAL:   return leftVal == rightVal ? 1.0 : 0.0;
+        case TokenType::BANG_EQUAL:    return leftVal != rightVal ? 1.0 : 0.0;
         default: return 0;
     }
 }
 
-// ---- Statement Execution ----
+//Statement Execution
 
 void VarDecl::execute(Environment& env) const {
     double value = initializer ? initializer->evaluate(env) : 0.0;
