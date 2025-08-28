@@ -9,7 +9,7 @@ Token::Token(TokenType t, std::string lex, int ln)
 // Lexer constructor (initialize variables and keywords)
 Lexer::Lexer(std::string src)
     : source(std::move(src)), start(0), current(0), line(1) {
-    keywords = ({
+    keywords = {
         {"let", TokenType::LET},
         {"var", TokenType::VAR},
         {"func", TokenType::FUNC},
@@ -26,7 +26,7 @@ Lexer::Lexer(std::string src)
         {"or", TokenType::OR},
         {"not", TokenType::NOT},
         {"assemble", TokenType::ASSEMBLE}
-    }) {};
+    };
 }
 
 std::vector<Token> Lexer::scanTokens() {
