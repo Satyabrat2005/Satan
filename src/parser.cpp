@@ -211,7 +211,7 @@ double LiteralExpr::evaluate(Environment&) const {
             return 0.0;
         }
     } 
-    else if (value.type == TokenType::STRING) {
+    else if (value.type == TokenType::STRING){
 
         std::cout << value.lexeme;
         return 0.0;
