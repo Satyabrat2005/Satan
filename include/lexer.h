@@ -25,7 +25,7 @@ enum class TokenType {
     LET, VAR, FUNC,
     IF, ELSE, WHILE, FOR, RETURN,
     PRINT, TRUE, FALSE,
-    AND, OR, NOT, ASSEMBLE,
+    AND, OR, NOT, ASSEMBLE, SUMMON,
 
     // Special
     EOF_TOKEN,
