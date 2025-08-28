@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-// ---- Expression Base ----
+
 class Expr {
 public:
     virtual ~Expr() = default;
@@ -14,7 +14,7 @@ public:
     virtual double evaluate(Environment& env) const = 0;
 };
 
-// ---- Expression Nodes ----
+
 class LiteralExpr : public Expr {
 public:
     Token value;
