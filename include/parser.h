@@ -119,6 +119,17 @@ public:
     }
 };
 
+class SummonStmt : public Stmt {
+public:
+    std::unique_ptr<Expr> message;
+    SummonStmt(std::unique_ptr<Expr> msg) : message(std::move(msg)) {}
+    void execute(Environment& env) const override {
+        Value val = message->evaluate(env);
+        std::cout << val.toString() << std::endl;
+    }
+};
+
+
 // Parser
 class Parser {
 public:
