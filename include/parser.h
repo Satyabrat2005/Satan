@@ -52,7 +52,8 @@ public:
     virtual void execute(Environment& env) const = 0;
 };
 
-//Statement Nodes
+// ----------------- Statement Nodes -----------------
+
 class VarDecl : public Stmt {
 public:
     Token name;
@@ -80,7 +81,6 @@ public:
 
     void execute(Environment& env) const override;
 };
-
 
 class IfStmt : public Stmt {
 public:
@@ -122,18 +122,15 @@ public:
 
 class SummonStmt : public Stmt {
 public:
-    std::unique_ptr<Expr> message;
-    SummonStmt(std::unique_ptr<Expr> msg) : message(std::move(msg)) {}
+    explicit SummonStmt(std::unique_ptr<Expr> msg) : message(std::move(msg)) {}
+    void execute(Environment& env) const override; 
 
-    void execute(Environment& env) const override {
-        double val = message->evaluate(env);
-        std::cout << "[Summon] " << val << std::endl;
-    }
+private:
+    std::unique_ptr<Expr> message;
 };
 
+// ----------------- Parser -----------------
 
-
-// Parser
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
@@ -148,7 +145,8 @@ private:
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
-    std::unique_ptr<Stmt> ifStatement();    
+    std::unique_ptr<Stmt> ifStatement();
+    std::unique_ptr<Stmt> summonStatement();
 
     std::unique_ptr<Stmt> parseBlock();
     std::unique_ptr<Stmt> expressionStatement();
@@ -168,4 +166,5 @@ private:
     Token consume(TokenType type, const std::string& message);
     bool isAtEnd() const;
 };
+
 #endif 
