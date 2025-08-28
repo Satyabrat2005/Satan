@@ -32,6 +32,7 @@ std::unique_ptr<Stmt> Parser::varDeclaration() {
 std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT})) return printStatement();
     if (match({TokenType::ASSEMBLE})) return assembleStatement();
+    if (match({TokenType::SUMMON})) return summonStatement();
     if (match({TokenType::IF})) return ifStatement();
     if (match({TokenType::LEFT_BRACE})) return parseBlock();
     return expressionStatement();
