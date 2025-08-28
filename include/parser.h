@@ -52,7 +52,7 @@ public:
     virtual void execute(Environment& env) const = 0;
 };
 
-// ----------------- Statement Nodes -----------------
+//Statement Nodes
 
 class VarDecl : public Stmt {
 public:
