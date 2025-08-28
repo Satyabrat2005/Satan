@@ -192,18 +192,6 @@ void LiteralExpr::print() const {
 }
 
 double LiteralExpr::evaluate(Environment&) const {
-    try {
-        return std::stod(value.lexeme);
-    } catch (...) {
-        return 0.0;
-    }
-}
-
-void VariableExpr::print() const {
-    std::cout << "Variable(" << name.lexeme << ")";
-}
-
-double LiteralExpr::evaluate(Environment&) const {
     if (value.type == TokenType::NUMBER) {
         try {
             return std::stod(value.lexeme);
@@ -217,6 +205,10 @@ double LiteralExpr::evaluate(Environment&) const {
         return 0.0;
     }
     return 0.0;
+}
+
+void VariableExpr::print() const {
+    std::cout << "Variable(" << name.lexeme << ")";
 }
 
 
