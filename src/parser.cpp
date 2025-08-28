@@ -203,14 +203,22 @@ void VariableExpr::print() const {
     std::cout << "Variable(" << name.lexeme << ")";
 }
 
-double VariableExpr::evaluate(Environment& env) const {
-    try {
-        return env.get(name.lexeme);
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Runtime error: " << e.what() << "\n";
-        std::exit(1);
+double LiteralExpr::evaluate(Environment&) const {
+    if (value.type == TokenType::NUMBER) {
+        try {
+            return std::stod(value.lexeme);
+        } catch (...) {
+            return 0.0;
+        }
+    } 
+    else if (value.type == TokenType::STRING) {
+
+        std::cout << value.lexeme;
+        return 0.0;
     }
+    return 0.0;
 }
+
 
 void BinaryExpr::print() const {
     std::cout << "BinaryExpr(";
