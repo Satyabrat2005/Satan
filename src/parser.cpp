@@ -266,3 +266,12 @@ void IfStmt::execute(Environment& env) const {
         elseBranch->execute(env);
     }
 }
+double VariableExpr::evaluate(Environment& env) const {
+    try {
+        return env.get(name.lexeme);
+    } catch (const std::runtime_error& e) {
+        std::cerr << e.what() << std::endl;
+        return 0.0;
+    }
+}
+
