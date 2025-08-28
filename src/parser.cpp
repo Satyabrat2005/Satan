@@ -276,3 +276,9 @@ double VariableExpr::evaluate(Environment& env) const {
     }
 }
 
+void SummonStmt::execute(Environment& env) const {
+    Value val = expr->evaluate(env);
+    std::cout << "[Summon] " << val << std::endl;
+}
+
+
