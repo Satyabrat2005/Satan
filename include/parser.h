@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <iostream>
 #include "lexer.h"
 #include "environment.h"
 #include <memory>
