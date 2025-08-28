@@ -44,14 +44,14 @@ public:
     double evaluate(Environment& env) const override;
 };
 
-// ---- Statement Base ----
+
 class Stmt {
 public:
     virtual ~Stmt() = default;
     virtual void execute(Environment& env) const = 0;
 };
 
-// ---- Statement Nodes ----
+//Statement Nodes
 class VarDecl : public Stmt {
 public:
     Token name;
@@ -100,7 +100,7 @@ public:
         : statements(std::move(stmts)) {}
 
     void execute(Environment& env) const override {
-        Environment blockEnv = env;  // or a scoped Environment if supported
+        Environment blockEnv = env;  
         for (const auto& stmt : statements) {
             stmt->execute(blockEnv);
         }
@@ -115,11 +115,11 @@ public:
         : expr(std::move(e)) {}
 
     void execute(Environment& env) const override {
-        expr->evaluate(env);  // optionally do something with result
+        expr->evaluate(env); 
     }
 };
 
-// ---- Parser ----
+// Parser
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
@@ -152,4 +152,4 @@ private:
     bool isAtEnd() const;
 };
 
-#endif // PARSER_H
+#endif
