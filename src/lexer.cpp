@@ -137,7 +137,7 @@ void Lexer::string() {
         return;
     }
 
-    advance(); // Consume closing "
+    advance(); 
 
     std::string value = source.substr(start + 1, current - start - 2);
     tokens.emplace_back(TokenType::STRING, value, line);
@@ -177,6 +177,6 @@ void Lexer::multiLineComment() {
         std::cerr << "[Line " << line << "] Unterminated multi-line comment.\n";
         return;
     }
-    advance(); // *
-    advance(); // /
+    advance(); 
+    advance(); 
 }
