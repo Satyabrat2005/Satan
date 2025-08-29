@@ -6,5 +6,5 @@ void Interpreter::interpret(const Expr* expr) const {
 }
 
 void Interpreter::evaluate(const Expr* expr) const {
-    expr->print();  // For now, just print the AST for debugging
+    expr->print();  //Fr now am printing AST only !!
 }
