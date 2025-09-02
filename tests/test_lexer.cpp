@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cassert>
 
-// Construct for debugging readable token type
+
 std::string tokenTypeToString(TokenType type) {
     switch (type) {
         case TokenType::LET: return "LET";
@@ -33,6 +33,6 @@ int main() {
     assert(tokens[3].lexeme == "42");
     assert(tokens[4].type == TokenType::SEMICOLON);
 
-    std::cout << "✅ Lexer test passed successfully.\n";
+    std::cout << " Lexer test passed successfully.\n";
     return 0;
 }
