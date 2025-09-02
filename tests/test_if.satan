@@ -1,10 +1,7 @@
-let x = 5;
-let y = 10;
+let x = 10;
+var name = "SatanLang";
+summon "Hello, World!";
 
-if (x < y) {
-    print x;
-} else {
-    print y;
+if (x >= 10) {
+    summon "x is large";
 }
-
-assemble x + y;
