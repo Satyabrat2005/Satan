@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-
+// ----------------- Expressions -----------------
 class Expr {
 public:
     virtual ~Expr() = default;
@@ -44,8 +44,20 @@ public:
     double evaluate(Environment& env) const override;
 };
 
+// ---- NEW: Function Call Expression ----
+class CallExpr : public Expr {
+public:
+    std::unique_ptr<Expr> callee;
+    std::vector<std::unique_ptr<Expr>> arguments;
 
+    CallExpr(std::unique_ptr<Expr> c, std::vector<std::unique_ptr<Expr>> args)
+        : callee(std::move(c)), arguments(std::move(args)) {}
 
+    void print() const override;
+    double evaluate(Environment& env) const override;
+};
+
+// ----------------- Statements -----------------
 class Stmt {
 public:
     virtual ~Stmt() = default;
@@ -92,54 +104,57 @@ public:
     void execute(Environment& env) const override;
 };
 
-class WhileStmt : public Stmt {
-public:
-    std::unique_ptr<Expr> condition;
-    std::unique_ptr<Stmt> body;
-
-    WhileStmt(std::unique_ptr<Expr> cond, std::unique_ptr<Stmt> b)
-        : condition(std::move(cond)), body(std::move(b)) {}
-
-    void execute(Environment& env) const override;
-};
-
 class BlockStmt : public Stmt {
 public:
     std::vector<std::unique_ptr<Stmt>> statements;
     explicit BlockStmt(std::vector<std::unique_ptr<Stmt>> stmts)
         : statements(std::move(stmts)) {}
 
-    void execute(Environment& env) const override {
-        Environment blockEnv = env;
-        for (const auto& stmt : statements) {
-            stmt->execute(blockEnv);
-        }
-    }
+    void execute(Environment& env) const override;
 };
 
 class ExprStmt : public Stmt {
 public:
     std::unique_ptr<Expr> expr;
-
-    explicit ExprStmt(std::unique_ptr<Expr> e)
-        : expr(std::move(e)) {}
-
-    void execute(Environment& env) const override {
-        expr->evaluate(env);
-    }
+    explicit ExprStmt(std::unique_ptr<Expr> e) : expr(std::move(e)) {}
+    void execute(Environment& env) const override;
 };
 
 class SummonStmt : public Stmt {
 public:
     explicit SummonStmt(std::unique_ptr<Expr> msg) : message(std::move(msg)) {}
-    void execute(Environment& env) const override; 
+    void execute(Environment& env) const override;
 
 private:
     std::unique_ptr<Expr> message;
 };
 
+// ---- NEW: Function Declaration ----
+class FunDecl : public Stmt {
+public:
+    Token name;
+    std::vector<Token> params;
+    std::unique_ptr<BlockStmt> body;
 
+    FunDecl(Token n, std::vector<Token> p, std::unique_ptr<BlockStmt> b)
+        : name(std::move(n)), params(std::move(p)), body(std::move(b)) {}
 
+    void execute(Environment& env) const override;
+};
+
+// ---- NEW: Return Statement ----
+class ReturnStmt : public Stmt {
+public:
+    Token keyword;
+    std::unique_ptr<Expr> value;
+
+    ReturnStmt(Token k, std::unique_ptr<Expr> v)
+        : keyword(std::move(k)), value(std::move(v)) {}
+
+    void execute(Environment& env) const override;
+};
+
+// ----------------- Parser -----------------
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
@@ -149,26 +164,30 @@ private:
     const std::vector<Token>& tokens;
     int current;
 
-    // Declarations & statements
+    // ---- Statements ----
     std::unique_ptr<Stmt> declaration();
     std::unique_ptr<Stmt> varDeclaration();
+    std::unique_ptr<Stmt> funDeclaration();   // ✅ NEW
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
     std::unique_ptr<Stmt> ifStatement();
-    std::unique_ptr<Stmt> whileStatement();     
     std::unique_ptr<Stmt> summonStatement();
-
+    std::unique_ptr<Stmt> returnStatement();  // ✅ NEW
     std::unique_ptr<Stmt> parseBlock();
     std::unique_ptr<Stmt> expressionStatement();
+
+    // ---- Expressions ----
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> equality();
     std::unique_ptr<Expr> comparison();
     std::unique_ptr<Expr> term();
     std::unique_ptr<Expr> factor();
+    std::unique_ptr<Expr> unary();            // ✅ NEW (for future)
+    std::unique_ptr<Expr> call();             // ✅ NEW (function call parsing)
     std::unique_ptr<Expr> primary();
 
-   
+    // ---- Helpers ----
     Token advance();
     bool match(std::initializer_list<TokenType> types);
     bool check(TokenType type) const;
