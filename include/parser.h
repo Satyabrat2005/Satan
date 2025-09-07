@@ -7,7 +7,6 @@
 #include <memory>
 #include <vector>
 
-// ----------------- Expressions -----------------
 class Expr {
 public:
     virtual ~Expr() = default;
@@ -44,7 +43,7 @@ public:
     double evaluate(Environment& env) const override;
 };
 
-// ---- NEW: Function Call Expression ----
+
 class CallExpr : public Expr {
 public:
     std::unique_ptr<Expr> callee;
@@ -57,7 +56,7 @@ public:
     double evaluate(Environment& env) const override;
 };
 
-// ----------------- Statements -----------------
+
 class Stmt {
 public:
     virtual ~Stmt() = default;
@@ -129,7 +128,7 @@ private:
     std::unique_ptr<Expr> message;
 };
 
-// ---- NEW: Function Declaration ----
+
 class FunDecl : public Stmt {
 public:
     Token name;
@@ -142,7 +141,6 @@ public:
     void execute(Environment& env) const override;
 };
 
-// ---- NEW: Return Statement ----
 class ReturnStmt : public Stmt {
 public:
     Token keyword;
@@ -154,7 +152,7 @@ public:
     void execute(Environment& env) const override;
 };
 
-// ----------------- Parser -----------------
+
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
@@ -167,13 +165,13 @@ private:
     // ---- Statements ----
     std::unique_ptr<Stmt> declaration();
     std::unique_ptr<Stmt> varDeclaration();
-    std::unique_ptr<Stmt> funDeclaration();   // ✅ NEW
+    std::unique_ptr<Stmt> funDeclaration();   
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
     std::unique_ptr<Stmt> ifStatement();
     std::unique_ptr<Stmt> summonStatement();
-    std::unique_ptr<Stmt> returnStatement();  // ✅ NEW
+    std::unique_ptr<Stmt> returnStatement();  
     std::unique_ptr<Stmt> parseBlock();
     std::unique_ptr<Stmt> expressionStatement();
 
@@ -183,8 +181,8 @@ private:
     std::unique_ptr<Expr> comparison();
     std::unique_ptr<Expr> term();
     std::unique_ptr<Expr> factor();
-    std::unique_ptr<Expr> unary();            // ✅ NEW (for future)
-    std::unique_ptr<Expr> call();             // ✅ NEW (function call parsing)
+    std::unique_ptr<Expr> unary();          
+    std::unique_ptr<Expr> call();             
     std::unique_ptr<Expr> primary();
 
     // ---- Helpers ----
