@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 
+// ----------------- Expression Base & Nodes -----------------
 
 class Expr {
 public:
@@ -14,7 +15,6 @@ public:
     virtual void print() const = 0;
     virtual double evaluate(Environment& env) const = 0;
 };
-
 
 class LiteralExpr : public Expr {
 public:
@@ -45,14 +45,13 @@ public:
     double evaluate(Environment& env) const override;
 };
 
+// ----------------- Statement Base & Nodes -----------------
 
 class Stmt {
 public:
     virtual ~Stmt() = default;
     virtual void execute(Environment& env) const = 0;
 };
-
-//Statement Nodes
 
 class VarDecl : public Stmt {
 public:
@@ -94,6 +93,17 @@ public:
     void execute(Environment& env) const override;
 };
 
+class WhileStmt : public Stmt {
+public:
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Stmt> body;
+
+    WhileStmt(std::unique_ptr<Expr> cond, std::unique_ptr<Stmt> b)
+        : condition(std::move(cond)), body(std::move(b)) {}
+
+    void execute(Environment& env) const override;
+};
+
 class BlockStmt : public Stmt {
 public:
     std::vector<std::unique_ptr<Stmt>> statements;
@@ -101,7 +111,8 @@ public:
         : statements(std::move(stmts)) {}
 
     void execute(Environment& env) const override {
-        Environment blockEnv = env;  
+        // Create a new scope by copying environment (assumes Environment supports copy semantics)
+        Environment blockEnv = env;
         for (const auto& stmt : statements) {
             stmt->execute(blockEnv);
         }
@@ -116,14 +127,14 @@ public:
         : expr(std::move(e)) {}
 
     void execute(Environment& env) const override {
-        expr->evaluate(env); 
+        expr->evaluate(env);
     }
 };
 
 class SummonStmt : public Stmt {
 public:
     explicit SummonStmt(std::unique_ptr<Expr> msg) : message(std::move(msg)) {}
-    void execute(Environment& env) const override; 
+    void execute(Environment& env) const override; // implemented in parser.cpp or interpreter.cpp
 
 private:
     std::unique_ptr<Expr> message;
@@ -140,20 +151,23 @@ private:
     const std::vector<Token>& tokens;
     int current;
 
+    // Declarations & statements
     std::unique_ptr<Stmt> declaration();
     std::unique_ptr<Stmt> varDeclaration();
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
     std::unique_ptr<Stmt> ifStatement();
+    std::unique_ptr<Stmt> whileStatement();     // <-- added while parser
     std::unique_ptr<Stmt> summonStatement();
 
     std::unique_ptr<Stmt> parseBlock();
     std::unique_ptr<Stmt> expressionStatement();
 
+    // Expressions (precedence climbing / recursive descent)
     std::unique_ptr<Expr> expression();
-    std::unique_ptr<Expr> equality();    
-    std::unique_ptr<Expr> comparison();   
+    std::unique_ptr<Expr> equality();
+    std::unique_ptr<Expr> comparison();
     std::unique_ptr<Expr> term();
     std::unique_ptr<Expr> factor();
     std::unique_ptr<Expr> primary();
@@ -167,4 +181,4 @@ private:
     bool isAtEnd() const;
 };
 
-#endif 
+#endif
