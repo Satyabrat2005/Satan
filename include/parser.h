@@ -7,7 +7,6 @@
 #include <memory>
 #include <vector>
 
-// ----------------- Expression Base & Nodes -----------------
 
 class Expr {
 public:
@@ -45,7 +44,7 @@ public:
     double evaluate(Environment& env) const override;
 };
 
-// ----------------- Statement Base & Nodes -----------------
+
 
 class Stmt {
 public:
@@ -111,7 +110,6 @@ public:
         : statements(std::move(stmts)) {}
 
     void execute(Environment& env) const override {
-        // Create a new scope by copying environment (assumes Environment supports copy semantics)
         Environment blockEnv = env;
         for (const auto& stmt : statements) {
             stmt->execute(blockEnv);
@@ -134,13 +132,13 @@ public:
 class SummonStmt : public Stmt {
 public:
     explicit SummonStmt(std::unique_ptr<Expr> msg) : message(std::move(msg)) {}
-    void execute(Environment& env) const override; // implemented in parser.cpp or interpreter.cpp
+    void execute(Environment& env) const override; 
 
 private:
     std::unique_ptr<Expr> message;
 };
 
-// ----------------- Parser -----------------
+
 
 class Parser {
 public:
@@ -158,13 +156,11 @@ private:
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
     std::unique_ptr<Stmt> ifStatement();
-    std::unique_ptr<Stmt> whileStatement();     // <-- added while parser
+    std::unique_ptr<Stmt> whileStatement();     
     std::unique_ptr<Stmt> summonStatement();
 
     std::unique_ptr<Stmt> parseBlock();
     std::unique_ptr<Stmt> expressionStatement();
-
-    // Expressions (precedence climbing / recursive descent)
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> equality();
     std::unique_ptr<Expr> comparison();
@@ -172,7 +168,7 @@ private:
     std::unique_ptr<Expr> factor();
     std::unique_ptr<Expr> primary();
 
-    // ---- Helpers ----
+   
     Token advance();
     bool match(std::initializer_list<TokenType> types);
     bool check(TokenType type) const;
