@@ -1,7 +1,6 @@
 #include "parser.h"
 #include <stdexcept>
 
-// ----------------- Parser Implementation -----------------
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), current(0) {}
 
@@ -97,7 +96,6 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
     return std::make_unique<ExprStmt>(std::move(expr));
 }
 
-// ----------------- Expression Parsing -----------------
 
 std::unique_ptr<Expr> Parser::expression() {
     return equality();
@@ -168,8 +166,7 @@ std::unique_ptr<Expr> Parser::primary() {
 
     throw std::runtime_error("Unexpected token in expression.");
 }
-
-// ----------------- Helpers -----------------
+-
 
 Token Parser::advance() {
     if (!isAtEnd()) current++;
