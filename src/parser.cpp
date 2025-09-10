@@ -14,10 +14,9 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse() {
     return statements;
 }
 
-// ----------------- Declarations -----------------
 std::unique_ptr<Stmt> Parser::declaration() {
     if (match({TokenType::VAR, TokenType::LET})) return varDeclaration();
-    if (match({TokenType::FUN})) return funDeclaration();   // ✅ NEW
+    if (match({TokenType::FUN})) return funDeclaration(); 
     return statement();
 }
 
@@ -55,7 +54,7 @@ std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::ASSEMBLE})) return assembleStatement();
     if (match({TokenType::SUMMON})) return summonStatement();
     if (match({TokenType::IF})) return ifStatement();
-    if (match({TokenType::RETURN})) return returnStatement();   // ✅ NEW
+    if (match({TokenType::RETURN})) return returnStatement(); 
     if (match({TokenType::LEFT_BRACE})) return parseBlock();
     return expressionStatement();
 }
@@ -157,7 +156,7 @@ std::unique_ptr<Expr> Parser::term() {
 }
 
 std::unique_ptr<Expr> Parser::factor() {
-    auto expr = call();   // ✅ NEW (was primary before)
+    auto expr = call();  
     while (match({TokenType::STAR, TokenType::SLASH})) {
         Token op = tokens[current - 1];
         auto right = call();
