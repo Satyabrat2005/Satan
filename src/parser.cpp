@@ -303,13 +303,11 @@ void CallExpr::print() const {
 }
 
 double CallExpr::evaluate(Environment& env) const {
-    // 🚨 Placeholder: actual function execution will require
-    // function storage + Return handling
     std::cout << "[CallExpr executed]" << std::endl;
     return 0.0;
 }
 
-// ----------------- Statement Execution -----------------
+
 void VarDecl::execute(Environment& env) const {
     double value = initializer ? initializer->evaluate(env) : 0.0;
     env.define(name.lexeme, value);
@@ -347,7 +345,6 @@ void SummonStmt::execute(Environment& env) const {
 }
 
 void FunDecl::execute(Environment& env) const {
-    // 🚨 Stub: later we store function object in env
     std::cout << "Function " << name.lexeme << " declared." << std::endl;
 }
 
