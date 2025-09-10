@@ -3,14 +3,30 @@
 
 #include <string>
 #include <unordered_map>
+#include <variant>
+#include <memory>
+#include <vector>
+
+// Forward declarations
+class BlockStmt;
+
+struct FunctionObject {
+    std::vector<std::string> params;
+    std::shared_ptr<BlockStmt> body;
+};
 
 class Environment {
 private:
-    std::unordered_map<std::string, double> values;
+    std::unordered_map<std::string, std::variant<double, FunctionObject>> values;
 
 public:
     void define(const std::string& name, double value);
-    double get(const std::string& name) const;
+    void defineFunction(const std::string& name, const FunctionObject& func);
+
+    double getNumber(const std::string& name) const;
+    FunctionObject getFunction(const std::string& name) const;
+
+    bool exists(const std::string& name) const;
 };
 
 #endif
