@@ -2,6 +2,7 @@
 #include "../include/environment.h"
 #include <iostream>
 #include <cstdlib>
+#include <stdexcept>
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), current(0) {}
 
@@ -14,9 +15,10 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse() {
     return statements;
 }
 
+// ----------------- Declarations -----------------
 std::unique_ptr<Stmt> Parser::declaration() {
     if (match({TokenType::VAR, TokenType::LET})) return varDeclaration();
-    if (match({TokenType::FUN})) return funDeclaration(); 
+    if (match({TokenType::FUN})) return funDeclaration();
     return statement();
 }
 
@@ -54,7 +56,11 @@ std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::ASSEMBLE})) return assembleStatement();
     if (match({TokenType::SUMMON})) return summonStatement();
     if (match({TokenType::IF})) return ifStatement();
-    if (match({TokenType::RETURN})) return returnStatement(); 
+    if (match({TokenType::WHILE})) return whileStatement();
+    if (match({TokenType::FOR})) return forStatement();
+    if (match({TokenType::BREAK})) return breakStatement();
+    if (match({TokenType::CONTINUE})) return continueStatement();
+    if (match({TokenType::RETURN})) return returnStatement();
     if (match({TokenType::LEFT_BRACE})) return parseBlock();
     return expressionStatement();
 }
@@ -70,23 +76,59 @@ std::unique_ptr<Stmt> Parser::ifStatement() {
     auto condition = expression();
     consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
 
-    std::unique_ptr<Stmt> thenBranch;
-    if (match({TokenType::LEFT_BRACE})) {
-        thenBranch = parseBlock();
-    } else {
-        thenBranch = statement();
-    }
-
+    std::unique_ptr<Stmt> thenBranch = statement();
     std::unique_ptr<Stmt> elseBranch = nullptr;
     if (match({TokenType::ELSE})) {
-        if (match({TokenType::LEFT_BRACE})) {
-            elseBranch = parseBlock();
-        } else {
-            elseBranch = statement();
-        }
+        elseBranch = statement();
     }
 
     return std::make_unique<IfStmt>(std::move(condition), std::move(thenBranch), std::move(elseBranch));
+}
+
+std::unique_ptr<Stmt> Parser::whileStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+    auto condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+    auto body = statement();
+    return std::make_unique<WhileStmt>(std::move(condition), std::move(body));
+}
+
+std::unique_ptr<Stmt> Parser::forStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+
+    std::unique_ptr<Stmt> initializer;
+    if (match({TokenType::SEMICOLON})) {
+        initializer = nullptr;
+    } else if (match({TokenType::VAR})) {
+        initializer = varDeclaration();
+    } else {
+        initializer = expressionStatement();
+    }
+
+    std::unique_ptr<Expr> condition = nullptr;
+    if (!check(TokenType::SEMICOLON)) {
+        condition = expression();
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+    std::unique_ptr<Expr> increment = nullptr;
+    if (!check(TokenType::RIGHT_PAREN)) {
+        increment = expression();
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    auto body = statement();
+    return std::make_unique<ForStmt>(std::move(initializer), std::move(condition), std::move(increment), std::move(body));
+}
+
+std::unique_ptr<Stmt> Parser::breakStatement() {
+    consume(TokenType::SEMICOLON, "Expect ';' after 'break'.");
+    return std::make_unique<BreakStmt>();
+}
+
+std::unique_ptr<Stmt> Parser::continueStatement() {
+    consume(TokenType::SEMICOLON, "Expect ';' after 'continue'.");
+    return std::make_unique<ContinueStmt>();
 }
 
 std::unique_ptr<Stmt> Parser::parseBlock() {
@@ -122,7 +164,17 @@ std::unique_ptr<Stmt> Parser::returnStatement() {
 
 // ----------------- Expressions -----------------
 std::unique_ptr<Expr> Parser::expression() {
-    return equality();
+    return logical();
+}
+
+std::unique_ptr<Expr> Parser::logical() {
+    auto expr = equality();
+    while (match({TokenType::AND, TokenType::OR})) {
+        Token op = tokens[current - 1];
+        auto right = equality();
+        expr = std::make_unique<LogicalExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
 }
 
 std::unique_ptr<Expr> Parser::equality() {
@@ -156,13 +208,22 @@ std::unique_ptr<Expr> Parser::term() {
 }
 
 std::unique_ptr<Expr> Parser::factor() {
-    auto expr = call();  
+    auto expr = unary();
     while (match({TokenType::STAR, TokenType::SLASH})) {
         Token op = tokens[current - 1];
-        auto right = call();
+        auto right = unary();
         expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
     }
     return expr;
+}
+
+std::unique_ptr<Expr> Parser::unary() {
+    if (match({TokenType::BANG, TokenType::MINUS})) {
+        Token op = tokens[current - 1];
+        auto right = unary();
+        return std::make_unique<UnaryExpr>(op, std::move(right));
+    }
+    return call();
 }
 
 std::unique_ptr<Expr> Parser::call() {
@@ -232,125 +293,76 @@ bool Parser::isAtEnd() const {
 }
 
 // ----------------- AST Printing/Evaluation -----------------
-void LiteralExpr::print() const {
-    std::cout << "Literal(" << value.lexeme << ")";
+// (Literal, Variable, Binary, Unary, Logical, Call, VarDecl, Print, Assemble, If, While, For, Break, Continue, etc.)
+// You already had most implemented — add UnaryExpr and LogicalExpr
+
+void UnaryExpr::print() const {
+    std::cout << "Unary(" << op.lexeme << " ";
+    right->print();
+    std::cout << ")";
 }
 
-double LiteralExpr::evaluate(Environment&) const {
-    if (value.type == TokenType::NUMBER) {
-        try {
-            return std::stod(value.lexeme);
-        } catch (...) {
-            return 0.0;
-        }
-    } else if (value.type == TokenType::STRING) {
-        std::cout << value.lexeme;
-        return 0.0;
-    }
-    return 0.0;
+double UnaryExpr::evaluate(Environment& env) const {
+    double val = right->evaluate(env);
+    if (op.type == TokenType::MINUS) return -val;
+    if (op.type == TokenType::BANG) return val == 0 ? 1.0 : 0.0;
+    return val;
 }
 
-void VariableExpr::print() const {
-    std::cout << "Variable(" << name.lexeme << ")";
-}
-
-double VariableExpr::evaluate(Environment& env) const {
-    try {
-        return env.get(name.lexeme);
-    } catch (const std::runtime_error& e) {
-        std::cerr << e.what() << std::endl;
-        return 0.0;
-    }
-}
-
-void BinaryExpr::print() const {
-    std::cout << "BinaryExpr(";
+void LogicalExpr::print() const {
+    std::cout << "Logical(";
     left->print();
     std::cout << " " << op.lexeme << " ";
     right->print();
     std::cout << ")";
 }
 
-double BinaryExpr::evaluate(Environment& env) const {
+double LogicalExpr::evaluate(Environment& env) const {
     double leftVal = left->evaluate(env);
-    double rightVal = right->evaluate(env);
-
-    switch (op.type) {
-        case TokenType::PLUS:  return leftVal + rightVal;
-        case TokenType::MINUS: return leftVal - rightVal;
-        case TokenType::STAR:  return leftVal * rightVal;
-        case TokenType::SLASH: return rightVal != 0 ? leftVal / rightVal : 0;
-        case TokenType::GREATER:       return leftVal > rightVal ? 1.0 : 0.0;
-        case TokenType::GREATER_EQUAL: return leftVal >= rightVal ? 1.0 : 0.0;
-        case TokenType::LESS:          return leftVal < rightVal ? 1.0 : 0.0;
-        case TokenType::LESS_EQUAL:    return leftVal <= rightVal ? 1.0 : 0.0;
-        case TokenType::EQUAL_EQUAL:   return leftVal == rightVal ? 1.0 : 0.0;
-        case TokenType::BANG_EQUAL:    return leftVal != rightVal ? 1.0 : 0.0;
-        default: return 0;
+    if (op.type == TokenType::OR) {
+        if (leftVal) return 1.0;
+        return right->evaluate(env);
     }
-}
-
-void CallExpr::print() const {
-    std::cout << "Call(";
-    callee->print();
-    std::cout << " args[";
-    for (size_t i = 0; i < arguments.size(); i++) {
-        arguments[i]->print();
-        if (i < arguments.size() - 1) std::cout << ", ";
+    if (op.type == TokenType::AND) {
+        if (!leftVal) return 0.0;
+        return right->evaluate(env);
     }
-    std::cout << "])";
-}
-
-double CallExpr::evaluate(Environment& env) const {
-    std::cout << "[CallExpr executed]" << std::endl;
     return 0.0;
 }
 
-
-void VarDecl::execute(Environment& env) const {
-    double value = initializer ? initializer->evaluate(env) : 0.0;
-    env.define(name.lexeme, value);
-}
-
-void PrintStmt::execute(Environment& env) const {
-    std::cout << expr->evaluate(env) << std::endl;
-}
-
-void AssembleStmt::execute(Environment& env) const {
-    std::cout << "[Assembler] " << expr->evaluate(env) << std::endl;
-}
-
-void IfStmt::execute(Environment& env) const {
-    if (condition->evaluate(env)) {
-        thenBranch->execute(env);
-    } else if (elseBranch) {
-        elseBranch->execute(env);
+void WhileStmt::execute(Environment& env) const {
+    while (condition->evaluate(env)) {
+        try {
+            body->execute(env);
+        } catch (const std::runtime_error& e) {
+            if (std::string(e.what()) == "Break") break;
+            if (std::string(e.what()) == "Continue") continue;
+            throw;
+        }
     }
 }
 
-void BlockStmt::execute(Environment& env) const {
-    Environment blockEnv = env;
-    for (const auto& stmt : statements) {
-        stmt->execute(blockEnv);
+void ForStmt::execute(Environment& env) const {
+    if (initializer) initializer->execute(env);
+    while (!condition || condition->evaluate(env)) {
+        try {
+            body->execute(env);
+        } catch (const std::runtime_error& e) {
+            if (std::string(e.what()) == "Break") break;
+            if (std::string(e.what()) == "Continue") {
+                if (increment) increment->evaluate(env);
+                continue;
+            }
+            throw;
+        }
+        if (increment) increment->evaluate(env);
     }
 }
 
-void ExprStmt::execute(Environment& env) const {
-    expr->evaluate(env);
+void BreakStmt::execute(Environment&) const {
+    throw std::runtime_error("Break");
 }
 
-void SummonStmt::execute(Environment& env) const {
-    std::cout << "[Summon] " << message->evaluate(env) << std::endl;
-}
-
-void FunDecl::execute(Environment& env) const {
-    std::cout << "Function " << name.lexeme << " declared." << std::endl;
-}
-
-void ReturnStmt::execute(Environment& env) const {
-    std::cout << "Return ";
-    if (value) {
-        std::cout << value->evaluate(env);
-    }
-    std::cout << std::endl;
+void ContinueStmt::execute(Environment&) const {
+    throw std::runtime_error("Continue");
 }
