@@ -6,7 +6,9 @@
 #include "environment.h"
 #include <memory>
 #include <vector>
+#include <optional>
 
+// ----------------- Expressions -----------------
 class Expr {
 public:
     virtual ~Expr() = default;
@@ -43,7 +45,6 @@ public:
     double evaluate(Environment& env) const override;
 };
 
-
 class CallExpr : public Expr {
 public:
     std::unique_ptr<Expr> callee;
@@ -56,7 +57,34 @@ public:
     double evaluate(Environment& env) const override;
 };
 
+// ---- NEW: Logical Expression (and/or) ----
+class LogicalExpr : public Expr {
+public:
+    std::unique_ptr<Expr> left;
+    Token op;
+    std::unique_ptr<Expr> right;
 
+    LogicalExpr(std::unique_ptr<Expr> l, Token o, std::unique_ptr<Expr> r)
+        : left(std::move(l)), op(std::move(o)), right(std::move(r)) {}
+
+    void print() const override;
+    double evaluate(Environment& env) const override;
+};
+
+// ---- NEW: Unary Expression ----
+class UnaryExpr : public Expr {
+public:
+    Token op;
+    std::unique_ptr<Expr> right;
+
+    UnaryExpr(Token o, std::unique_ptr<Expr> r)
+        : op(std::move(o)), right(std::move(r)) {}
+
+    void print() const override;
+    double evaluate(Environment& env) const override;
+};
+
+// ----------------- Statements -----------------
 class Stmt {
 public:
     virtual ~Stmt() = default;
@@ -84,10 +112,7 @@ public:
 class PrintStmt : public Stmt {
 public:
     std::unique_ptr<Expr> expr;
-
-    explicit PrintStmt(std::unique_ptr<Expr> e)
-        : expr(std::move(e)) {}
-
+    explicit PrintStmt(std::unique_ptr<Expr> e) : expr(std::move(e)) {}
     void execute(Environment& env) const override;
 };
 
@@ -128,7 +153,6 @@ private:
     std::unique_ptr<Expr> message;
 };
 
-
 class FunDecl : public Stmt {
 public:
     Token name;
@@ -152,7 +176,46 @@ public:
     void execute(Environment& env) const override;
 };
 
+// ---- NEW: While Loop ----
+class WhileStmt : public Stmt {
+public:
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Stmt> body;
 
+    WhileStmt(std::unique_ptr<Expr> cond, std::unique_ptr<Stmt> b)
+        : condition(std::move(cond)), body(std::move(b)) {}
+
+    void execute(Environment& env) const override;
+};
+
+// ---- NEW: For Loop ----
+class ForStmt : public Stmt {
+public:
+    std::unique_ptr<Stmt> initializer;
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Expr> increment;
+    std::unique_ptr<Stmt> body;
+
+    ForStmt(std::unique_ptr<Stmt> init, std::unique_ptr<Expr> cond,
+            std::unique_ptr<Expr> inc, std::unique_ptr<Stmt> b)
+        : initializer(std::move(init)), condition(std::move(cond)),
+          increment(std::move(inc)), body(std::move(b)) {}
+
+    void execute(Environment& env) const override;
+};
+
+// ---- NEW: Break / Continue ----
+class BreakStmt : public Stmt {
+public:
+    void execute(Environment& env) const override;
+};
+
+class ContinueStmt : public Stmt {
+public:
+    void execute(Environment& env) const override;
+};
+
+// ----------------- Parser -----------------
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
@@ -165,24 +228,29 @@ private:
     // ---- Statements ----
     std::unique_ptr<Stmt> declaration();
     std::unique_ptr<Stmt> varDeclaration();
-    std::unique_ptr<Stmt> funDeclaration();   
+    std::unique_ptr<Stmt> funDeclaration();
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> assembleStatement();
     std::unique_ptr<Stmt> ifStatement();
+    std::unique_ptr<Stmt> whileStatement();      
+    std::unique_ptr<Stmt> forStatement();       
     std::unique_ptr<Stmt> summonStatement();
-    std::unique_ptr<Stmt> returnStatement();  
+    std::unique_ptr<Stmt> returnStatement();
+    std::unique_ptr<Stmt> breakStatement();      
+    std::unique_ptr<Stmt> continueStatement();   
     std::unique_ptr<Stmt> parseBlock();
     std::unique_ptr<Stmt> expressionStatement();
 
     // ---- Expressions ----
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> equality();
+    std::unique_ptr<Expr> logical();          
     std::unique_ptr<Expr> comparison();
     std::unique_ptr<Expr> term();
     std::unique_ptr<Expr> factor();
-    std::unique_ptr<Expr> unary();          
-    std::unique_ptr<Expr> call();             
+    std::unique_ptr<Expr> unary();
+    std::unique_ptr<Expr> call();
     std::unique_ptr<Expr> primary();
 
     // ---- Helpers ----
