@@ -1,10 +1,9 @@
 #include "../include/interpreter.h"
 #include <iostream>
 
-// ---------------- Constructor ----------------
 Interpreter::Interpreter() : env() {}
 
-// ---------------- Program Runner ----------------
+
 void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements) {
     try {
         for (const auto& stmt : statements) {
@@ -15,7 +14,6 @@ void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements
     }
 }
 
-// ---------------- Statement Execution ----------------
 void Interpreter::execute(const Stmt* stmt) {
     if (!stmt) return;
     stmt->execute(env);
@@ -27,7 +25,6 @@ void Interpreter::executeBlock(const std::vector<std::unique_ptr<Stmt>>& stateme
     }
 }
 
-// ---------------- Expression Evaluation ----------------
 double Interpreter::evaluate(const Expr* expr) {
     if (!expr) return 0;
     return expr->evaluate(env);
