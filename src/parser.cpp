@@ -15,7 +15,6 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse() {
     return statements;
 }
 
-// ----------------- Declarations -----------------
 std::unique_ptr<Stmt> Parser::declaration() {
     if (match({TokenType::VAR, TokenType::LET})) return varDeclaration();
     if (match({TokenType::FUN})) return funDeclaration();
@@ -291,10 +290,6 @@ Token Parser::consume(TokenType type, const std::string& message) {
 bool Parser::isAtEnd() const {
     return peek().type == TokenType::EOF_TOKEN;
 }
-
-// ----------------- AST Printing/Evaluation -----------------
-// (Literal, Variable, Binary, Unary, Logical, Call, VarDecl, Print, Assemble, If, While, For, Break, Continue, etc.)
-// You already had most implemented — add UnaryExpr and LogicalExpr
 
 void UnaryExpr::print() const {
     std::cout << "Unary(" << op.lexeme << " ";
