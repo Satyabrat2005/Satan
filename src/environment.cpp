@@ -13,6 +13,7 @@ double Environment::getNumber(const std::string& name) const {
     if (it != values.end() && std::holds_alternative<double>(it->second)) {
         return std::get<double>(it->second);
     }
+    if (parent) return parent->getNumber(name);
     throw std::runtime_error("Undefined variable or not a number: " + name);
 }
 
