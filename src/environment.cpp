@@ -29,6 +29,7 @@ FunctionObject Environment::getFunction(const std::string& name) const {
     if (it != values.end() && std::holds_alternative<FunctionObject>(it->second)) {
         return std::get<FunctionObject>(it->second);
     }
+    if (parent) return parent->getFunction(name);
     throw std::runtime_error("Undefined function: " + name);
 }
 
