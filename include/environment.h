@@ -21,6 +21,9 @@ private:
     Environment* parent;
 
 public:
+    Environment() : parent(nullptr) {}
+    explicit Environment(Environment* parentEnv) : parent(parentEnv) {}
+    
     void define(const std::string& name, double value);
     void defineFunction(const std::string& name, const FunctionObject& func);
 
