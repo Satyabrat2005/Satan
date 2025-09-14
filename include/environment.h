@@ -18,6 +18,7 @@ struct FunctionObject {
 class Environment {
 private:
     std::unordered_map<std::string, std::variant<double, FunctionObject>> values;
+    Environment* parent;
 
 public:
     void define(const std::string& name, double value);
