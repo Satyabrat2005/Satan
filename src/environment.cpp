@@ -35,5 +35,7 @@ FunctionObject Environment::getFunction(const std::string& name) const {
 
 // ---------------- Helpers ----------------
 bool Environment::exists(const std::string& name) const {
-    return values.find(name) != values.end();
+    if (values.find(name) != values.end()) return true;
+    if (parent) return parent->exists(name);
+    return false;
 }
