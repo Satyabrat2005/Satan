@@ -1,17 +1,17 @@
-# 🔱 Satan Programming Language
+# Satan Programming Language
 
 Satan is a modern programming language designed specifically for blazing-fast Data Science and Machine Learning.  
 Crafted in C++ for performance, yet offering the elegance and clarity of Python, Satan empowers you to build intelligent systems at scale.
 
 ---
 
-## 🚀 Why Satan?
+##  Why Satan?
 
-- ⚡️ Built on C++20 for maximum speed and zero-overhead abstractions.
-- 🧠 Designed for ML/AI from the ground up: training loops, tensor math, and GPU support.
-- 🪶 Pythonic syntax: easy to write, read, and debug.
-- 🔬 Statistical programming built-in: like R, but faster.
-- 🧵 Parallel, GPU, and async support baked into the language.
+-  Built on C++20 for maximum speed and zero-overhead abstractions.
+- Designed for ML/AI from the ground up: training loops, tensor math, and GPU support.
+-  Pythonic syntax: easy to write, read, and debug.
+-  Statistical programming built-in: like R, but faster.
+-  Parallel, GPU, and async support baked into the language.
 
 ---
 
