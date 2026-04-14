@@ -4,6 +4,13 @@
 
 // ---------------- Numbers ----------------
 void Environment::define(const std::string& name, double value) {
+    // Allow variable shadowing: a variable in a nested scope can have
+    // the same name as a variable in an outer scope, hiding the outer one.
+    // Only the current scope's map is written to, so the outer variable
+    // remains untouched and becomes visible again once this scope exits.
+    if (parent && parent->exists(name)) {
+        std::cout << "[env] variable " << name << " shadows outer variable" << std::endl;
+    }
     values[name] = value;
     std::cout << "[env] variable " << name << " = " << value << std::endl;
 }
