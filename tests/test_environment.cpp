@@ -283,6 +283,31 @@ TEST_CASE("Mixed variables and functions in nested scopes", "[environment][neste
     REQUIRE_FALSE(global.exists("radius"));
 }
 
+TEST_CASE("Inner scope shadows outer and outer unchanged after inner exits", "[environment][nested]") {
+    Environment outer;
+    outer.define("x", 10.0);
+
+    REQUIRE(outer.exists("x"));
+    REQUIRE(outer.getNumber("x") == 10.0);
+
+    // Enter an inner scope that shadows "x"
+    {
+        Environment inner(&outer);
+        inner.define("x", 99.0);
+
+        // Inner scope sees its own shadowed value
+        REQUIRE(inner.getNumber("x") == 99.0);
+
+        // Outer scope is still unchanged while inner is alive
+        REQUIRE(outer.getNumber("x") == 10.0);
+    }
+    // Inner scope has exited (destroyed)
+
+    // Outer scope variable remains unchanged after inner scope exit
+    REQUIRE(outer.exists("x"));
+    REQUIRE(outer.getNumber("x") == 10.0);
+}
+
 TEST_CASE("exists walks the full ancestor chain", "[environment][nested]") {
     Environment level0;
     level0.define("root_var", 0.0);
