@@ -1,6 +1,5 @@
 #include "../include/environment.h"
 #include <stdexcept>
-#include <iostream>
 
 // ---------------- Numbers ----------------
 void Environment::define(const std::string& name, double value) {
@@ -12,7 +11,6 @@ void Environment::define(const std::string& name, double value) {
         std::cout << "[env] variable " << name << " shadows outer variable" << std::endl;
     }
     values[name] = value;
-    std::cout << "[env] variable " << name << " = " << value << std::endl;
 }
 
 double Environment::getNumber(const std::string& name) const {
@@ -27,8 +25,6 @@ double Environment::getNumber(const std::string& name) const {
 // ---------------- Functions ----------------
 void Environment::defineFunction(const std::string& name, const FunctionObject& func) {
     values[name] = func;
-    std::cout << "[env] function " << name << " defined with "
-              << func.params.size() << " params" << std::endl;
 }
 
 FunctionObject Environment::getFunction(const std::string& name) const {
