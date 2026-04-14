@@ -1,8 +1,11 @@
 #include "../include/parser.h"
+#include "../include/interpreter.h"
 #include "../include/environment.h"
 #include <iostream>
 #include <cstdlib>
 #include <stdexcept>
+
+static constexpr int MAX_LOOP_ITERATIONS = 1000000;
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), current(0) {}
 
@@ -17,7 +20,7 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse() {
 
 std::unique_ptr<Stmt> Parser::declaration() {
     if (match({TokenType::VAR, TokenType::LET})) return varDeclaration();
-    if (match({TokenType::FUN})) return funDeclaration();
+    if (match({TokenType::FUNC, TokenType::FUN})) return funDeclaration();
     return statement();
 }
 
@@ -44,7 +47,13 @@ std::unique_ptr<Stmt> Parser::funDeclaration() {
     consume(TokenType::RIGHT_PAREN, "Expected ')' after parameters.");
 
     consume(TokenType::LEFT_BRACE, "Expected '{' before function body.");
-    auto body = std::unique_ptr<BlockStmt>(static_cast<BlockStmt*>(parseBlock().release()));
+    auto rawBlock = parseBlock().release();
+    auto* blockPtr = dynamic_cast<BlockStmt*>(rawBlock);
+    if (!blockPtr) {
+        delete rawBlock;
+        throw std::runtime_error("Parser error: Expected block statement in function body.");
+    }
+    auto body = std::shared_ptr<BlockStmt>(blockPtr);
 
     return std::make_unique<FunDecl>(name, std::move(parameters), std::move(body));
 }
@@ -163,6 +172,7 @@ std::unique_ptr<Stmt> Parser::returnStatement() {
 
 // ----------------- Expressions -----------------
 std::unique_ptr<Expr> Parser::expression() {
+    DepthGuard guard(depth);
     return logical();
 }
 
@@ -254,7 +264,7 @@ std::unique_ptr<Expr> Parser::primary() {
     if (match({TokenType::IDENTIFIER})) {
         return std::make_unique<VariableExpr>(tokens[current - 1]);
     }
-    return nullptr;
+    throw std::runtime_error("Parser error at line " + std::to_string(peek().line) + ": unexpected token '" + peek().lexeme + "'");
 }
 
 // ----------------- Helpers -----------------
@@ -289,6 +299,177 @@ Token Parser::consume(TokenType type, const std::string& message) {
 
 bool Parser::isAtEnd() const {
     return peek().type == TokenType::EOF_TOKEN;
+}
+
+// ----------------- Expression Implementations -----------------
+
+void LiteralExpr::print() const {
+    std::cout << value.lexeme;
+}
+
+double LiteralExpr::evaluate(Environment& env) const {
+    if (value.type == TokenType::NUMBER) {
+        return std::stod(value.lexeme);
+    }
+    if (value.type == TokenType::TRUE) return 1.0;
+    if (value.type == TokenType::FALSE) return 0.0;
+    if (value.type == TokenType::STRING) {
+        // Strings can't be represented as double; return 0 for now
+        // but printing is handled by SummonStmt/PrintStmt
+        return 0.0;
+    }
+    return 0.0;
+}
+
+void VariableExpr::print() const {
+    std::cout << name.lexeme;
+}
+
+double VariableExpr::evaluate(Environment& env) const {
+    return env.getNumber(name.lexeme);
+}
+
+void BinaryExpr::print() const {
+    std::cout << "(";
+    left->print();
+    std::cout << " " << op.lexeme << " ";
+    right->print();
+    std::cout << ")";
+}
+
+double BinaryExpr::evaluate(Environment& env) const {
+    double l = left->evaluate(env);
+    double r = right->evaluate(env);
+    switch (op.type) {
+        case TokenType::PLUS:          return l + r;
+        case TokenType::MINUS:         return l - r;
+        case TokenType::STAR:          return l * r;
+        case TokenType::SLASH:
+            if (r == 0) throw std::runtime_error("Division by zero.");
+            return l / r;
+        case TokenType::GREATER:       return l > r ? 1.0 : 0.0;
+        case TokenType::GREATER_EQUAL: return l >= r ? 1.0 : 0.0;
+        case TokenType::LESS:          return l < r ? 1.0 : 0.0;
+        case TokenType::LESS_EQUAL:    return l <= r ? 1.0 : 0.0;
+        case TokenType::EQUAL_EQUAL:   return l == r ? 1.0 : 0.0;
+        case TokenType::BANG_EQUAL:    return l != r ? 1.0 : 0.0;
+        default:
+            throw std::runtime_error("Unknown binary operator: " + op.lexeme);
+    }
+}
+
+void CallExpr::print() const {
+    callee->print();
+    std::cout << "(";
+    for (size_t i = 0; i < arguments.size(); i++) {
+        if (i > 0) std::cout << ", ";
+        arguments[i]->print();
+    }
+    std::cout << ")";
+}
+
+double CallExpr::evaluate(Environment& env) const {
+    // Get function name from callee
+    auto* varExpr = dynamic_cast<const VariableExpr*>(callee.get());
+    if (!varExpr) throw std::runtime_error("Can only call named functions.");
+
+    FunctionObject func = env.getFunction(varExpr->name.lexeme);
+
+    if (arguments.size() != func.params.size()) {
+        throw std::runtime_error("Expected " + std::to_string(func.params.size()) +
+                                 " arguments but got " + std::to_string(arguments.size()) + ".");
+    }
+
+    Environment callEnv(&env);
+    for (size_t i = 0; i < func.params.size(); i++) {
+        double argVal = arguments[i]->evaluate(env);
+        callEnv.define(func.params[i], argVal);
+    }
+
+    try {
+        func.body->execute(callEnv);
+    } catch (const ReturnException& ret) {
+        return ret.value;
+    }
+    return 0.0;
+}
+
+// ----------------- Statement Implementations -----------------
+
+void VarDecl::execute(Environment& env) const {
+    double val = 0.0;
+    if (initializer) {
+        val = initializer->evaluate(env);
+    }
+    env.define(name.lexeme, val);
+}
+
+void AssembleStmt::execute(Environment& env) const {
+    double val = expr->evaluate(env);
+    std::cout << val << std::endl;
+}
+
+void PrintStmt::execute(Environment& env) const {
+    double val = expr->evaluate(env);
+    std::cout << val << std::endl;
+}
+
+void IfStmt::execute(Environment& env) const {
+    double condVal = condition->evaluate(env);
+    if (condVal != 0.0) {
+        thenBranch->execute(env);
+    } else if (elseBranch) {
+        elseBranch->execute(env);
+    }
+}
+
+void BlockStmt::execute(Environment& env) const {
+    Environment blockEnv(&env);
+    for (const auto& stmt : statements) {
+        stmt->execute(blockEnv);
+    }
+}
+
+void ExprStmt::execute(Environment& env) const {
+    expr->evaluate(env);
+}
+
+void SummonStmt::execute(Environment& env) const {
+    // SummonStmt prints a message — check if it's a string literal
+    auto* lit = dynamic_cast<const LiteralExpr*>(message.get());
+    if (lit && lit->value.type == TokenType::STRING) {
+        std::cout << lit->value.lexeme << std::endl;
+    } else {
+        double val = message->evaluate(env);
+        std::cout << val << std::endl;
+    }
+}
+
+void FunDecl::execute(Environment& env) const {
+    FunctionObject func;
+    for (const auto& param : params) {
+        func.params.push_back(param.lexeme);
+    }
+    // Share ownership of the body so the FunctionObject keeps it alive
+    // even after the FunDecl statement is destroyed (e.g., in REPL mode)
+    func.body = body;
+    env.defineFunction(name.lexeme, func);
+}
+
+void ReturnStmt::execute(Environment& env) const {
+    double val = 0.0;
+    if (value) {
+        val = value->evaluate(env);
+    }
+    throw ReturnException(val);
+}
+
+// ----------------- Parser summonStatement -----------------
+
+std::unique_ptr<Stmt> Parser::summonStatement() {
+    auto expr = expression();
+    consume(TokenType::SEMICOLON, "Expected ';' after summon expression.");
+    return std::make_unique<SummonStmt>(std::move(expr));
 }
 
 void UnaryExpr::print() const {
@@ -326,38 +507,44 @@ double LogicalExpr::evaluate(Environment& env) const {
 }
 
 void WhileStmt::execute(Environment& env) const {
+    int iterations = 0;
     while (condition->evaluate(env)) {
+        if (++iterations > MAX_LOOP_ITERATIONS) {
+            throw std::runtime_error("While loop exceeded maximum iteration limit");
+        }
         try {
             body->execute(env);
-        } catch (const std::runtime_error& e) {
-            if (std::string(e.what()) == "Break") break;
-            if (std::string(e.what()) == "Continue") continue;
-            throw;
+        } catch (const BreakSignal&) {
+            break;
+        } catch (const ContinueSignal&) {
+            continue;
         }
     }
 }
 
 void ForStmt::execute(Environment& env) const {
     if (initializer) initializer->execute(env);
+    int iterations = 0;
     while (!condition || condition->evaluate(env)) {
+        if (++iterations > MAX_LOOP_ITERATIONS) {
+            throw std::runtime_error("For loop exceeded maximum iteration limit");
+        }
         try {
             body->execute(env);
-        } catch (const std::runtime_error& e) {
-            if (std::string(e.what()) == "Break") break;
-            if (std::string(e.what()) == "Continue") {
-                if (increment) increment->evaluate(env);
-                continue;
-            }
-            throw;
+        } catch (const BreakSignal&) {
+            break;
+        } catch (const ContinueSignal&) {
+            if (increment) increment->evaluate(env);
+            continue;
         }
         if (increment) increment->evaluate(env);
     }
 }
 
 void BreakStmt::execute(Environment&) const {
-    throw std::runtime_error("Break");
+    throw BreakSignal();
 }
 
 void ContinueStmt::execute(Environment&) const {
-    throw std::runtime_error("Continue");
+    throw ContinueSignal();
 }

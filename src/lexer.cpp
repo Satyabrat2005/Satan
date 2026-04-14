@@ -1,6 +1,7 @@
 #include "../include/lexer.h"
 #include <iostream>
 #include <cctype>
+#include <stdexcept>
 
 // Token constructor
 Token::Token(TokenType t, std::string lex, int ln)
@@ -9,6 +10,9 @@ Token::Token(TokenType t, std::string lex, int ln)
 // Lexer constructor (initialize variables and keywords)
 Lexer::Lexer(std::string src)
     : source(std::move(src)), start(0), current(0), line(1) {
+    if (source.size() > MAX_SOURCE_SIZE) {
+        throw std::runtime_error("Source input exceeds maximum allowed size of 10 MB");
+    }
     keywords = {
         {"let", TokenType::LET},
         {"var", TokenType::VAR},
@@ -25,7 +29,10 @@ Lexer::Lexer(std::string src)
         {"and", TokenType::AND},
         {"or", TokenType::OR},
         {"not", TokenType::NOT},
-        {"assemble", TokenType::ASSEMBLE}
+        {"assemble", TokenType::ASSEMBLE},
+        {"break", TokenType::BREAK},
+        {"continue", TokenType::CONTINUE},
+        {"fun", TokenType::FUN}
     };
 }
 
@@ -39,7 +46,7 @@ std::vector<Token> Lexer::scanTokens() {
 }
 
 bool Lexer::isAtEnd() const {
-    return current >= (int)source.length();
+    return current >= source.length();
 }
 
 void Lexer::scanToken() {
@@ -116,7 +123,7 @@ char Lexer::peek() const {
 }
 
 char Lexer::peekNext() const {
-    if (current + 1 >= (int)source.length()) return '\0';
+    if (current + 1 >= source.length()) return '\0';
     return source[current + 1];
 }
 
