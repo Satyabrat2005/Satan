@@ -1,0 +1,36 @@
+# Compiled binaries
+*.exe
+*.out
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+
+# Build directories
+build/
+bin/
+obj/
+cmake-build-*/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.dSYM/
+*.pdb
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
