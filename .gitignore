@@ -11,6 +11,7 @@
 # Build directories
 build/
 bin/
+obj/
 cmake-build-*/
 
 # IDE / Editor files
@@ -20,9 +21,13 @@ cmake-build-*/
 *.swo
 *~
 
-# OS metadata
+# OS-specific files
 .DS_Store
 Thumbs.db
+
+# Debug files
+*.dSYM/
+*.pdb
 
 # Environment / secrets
 .env

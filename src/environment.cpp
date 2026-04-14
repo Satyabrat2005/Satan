@@ -4,10 +4,16 @@
 
 // ---------------- Numbers ----------------
 void Environment::define(const std::string& name, double value) {
-    values[name] = value;
+    // Allow variable shadowing: a variable in a nested scope can have
+    // the same name as a variable in an outer scope, hiding the outer one.
+    // Only the current scope's map is written to, so the outer variable
+    // remains untouched and becomes visible again once this scope exits.
+    if (parent && parent->exists(name)) {
 #ifndef NDEBUG
-    std::cout << "[env] variable " << name << " = " << value << std::endl;
+        std::cout << "[env] variable " << name << " shadows outer variable" << std::endl;
 #endif
+    }
+    values[name] = value;
 }
 
 double Environment::getNumber(const std::string& name) const {
@@ -22,10 +28,6 @@ double Environment::getNumber(const std::string& name) const {
 // ---------------- Functions ----------------
 void Environment::defineFunction(const std::string& name, const FunctionObject& func) {
     values[name] = func;
-#ifndef NDEBUG
-    std::cout << "[env] function " << name << " defined with "
-              << func.params.size() << " params" << std::endl;
-#endif
 }
 
 FunctionObject Environment::getFunction(const std::string& name) const {
