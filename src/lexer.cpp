@@ -31,7 +31,8 @@ Lexer::Lexer(std::string src)
         {"not", TokenType::NOT},
         {"assemble", TokenType::ASSEMBLE},
         {"break", TokenType::BREAK},
-        {"continue", TokenType::CONTINUE}
+        {"continue", TokenType::CONTINUE},
+        {"fun", TokenType::FUN}
     };
 }
 
