@@ -23,7 +23,7 @@ enum class TokenType {
     IDENTIFIER, STRING, NUMBER,
 
     // Keywords
-    LET, VAR, FUNC,
+    LET, VAR, FUNC, FUN,
     IF, ELSE, WHILE, FOR, RETURN,
     PRINT, TRUE, FALSE,
     AND, OR, NOT, ASSEMBLE, SUMMON,
@@ -44,14 +44,16 @@ struct Token {
 
 class Lexer {
 public:
+    static constexpr size_t MAX_SOURCE_SIZE = 10 * 1024 * 1024; // 10 MB
+
     explicit Lexer(std::string src);
     std::vector<Token> scanTokens();
 
 private:
     std::string source;
     std::vector<Token> tokens;
-    int start;
-    int current;
+    size_t start;
+    size_t current;
     int line;
 
     std::unordered_map<std::string, TokenType> keywords;

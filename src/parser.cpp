@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <stdexcept>
 
+static constexpr int MAX_LOOP_ITERATIONS = 1000000;
+
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), current(0) {}
 
 std::vector<std::unique_ptr<Stmt>> Parser::parse() {
@@ -255,7 +257,7 @@ std::unique_ptr<Expr> Parser::primary() {
     if (match({TokenType::IDENTIFIER})) {
         return std::make_unique<VariableExpr>(tokens[current - 1]);
     }
-    return nullptr;
+    throw std::runtime_error("Parser error at line " + std::to_string(peek().line) + ": unexpected token '" + peek().lexeme + "'");
 }
 
 // ----------------- Helpers -----------------
@@ -501,7 +503,11 @@ double LogicalExpr::evaluate(Environment& env) const {
 }
 
 void WhileStmt::execute(Environment& env) const {
+    int iterations = 0;
     while (condition->evaluate(env)) {
+        if (++iterations > MAX_LOOP_ITERATIONS) {
+            throw std::runtime_error("While loop exceeded maximum iteration limit");
+        }
         try {
             body->execute(env);
         } catch (const std::runtime_error& e) {
@@ -514,7 +520,11 @@ void WhileStmt::execute(Environment& env) const {
 
 void ForStmt::execute(Environment& env) const {
     if (initializer) initializer->execute(env);
+    int iterations = 0;
     while (!condition || condition->evaluate(env)) {
+        if (++iterations > MAX_LOOP_ITERATIONS) {
+            throw std::runtime_error("For loop exceeded maximum iteration limit");
+        }
         try {
             body->execute(env);
         } catch (const std::runtime_error& e) {
