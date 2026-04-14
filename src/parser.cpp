@@ -47,7 +47,7 @@ std::unique_ptr<Stmt> Parser::funDeclaration() {
     consume(TokenType::RIGHT_PAREN, "Expected ')' after parameters.");
 
     consume(TokenType::LEFT_BRACE, "Expected '{' before function body.");
-    auto body = std::unique_ptr<BlockStmt>(static_cast<BlockStmt*>(parseBlock().release()));
+    auto body = std::shared_ptr<BlockStmt>(static_cast<BlockStmt*>(parseBlock().release()));
 
     return std::make_unique<FunDecl>(name, std::move(parameters), std::move(body));
 }
@@ -443,12 +443,9 @@ void FunDecl::execute(Environment& env) const {
     for (const auto& param : params) {
         func.params.push_back(param.lexeme);
     }
-    // Create a shared copy of the body for the function object
-    // We need to store the body pointer; use a shared_ptr workaround
-    func.body = std::shared_ptr<BlockStmt>(
-        static_cast<BlockStmt*>(const_cast<BlockStmt*>(body.get())),
-        [](BlockStmt*) {} // no-op deleter since FunDecl owns the body
-    );
+    // Share ownership of the body so the FunctionObject keeps it alive
+    // even after the FunDecl statement is destroyed (e.g., in REPL mode)
+    func.body = body;
     env.defineFunction(name.lexeme, func);
 }
 
