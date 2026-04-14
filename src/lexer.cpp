@@ -25,7 +25,9 @@ Lexer::Lexer(std::string src)
         {"and", TokenType::AND},
         {"or", TokenType::OR},
         {"not", TokenType::NOT},
-        {"assemble", TokenType::ASSEMBLE}
+        {"assemble", TokenType::ASSEMBLE},
+        {"break", TokenType::BREAK},
+        {"continue", TokenType::CONTINUE}
     };
 }
 
@@ -39,7 +41,7 @@ std::vector<Token> Lexer::scanTokens() {
 }
 
 bool Lexer::isAtEnd() const {
-    return current >= (int)source.length();
+    return current >= static_cast<int>(source.length());
 }
 
 void Lexer::scanToken() {
@@ -116,7 +118,7 @@ char Lexer::peek() const {
 }
 
 char Lexer::peekNext() const {
-    if (current + 1 >= (int)source.length()) return '\0';
+    if (current + 1 >= static_cast<int>(source.length())) return '\0';
     return source[current + 1];
 }
 

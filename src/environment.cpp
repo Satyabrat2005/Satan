@@ -5,7 +5,9 @@
 // ---------------- Numbers ----------------
 void Environment::define(const std::string& name, double value) {
     values[name] = value;
+#ifndef NDEBUG
     std::cout << "[env] variable " << name << " = " << value << std::endl;
+#endif
 }
 
 double Environment::getNumber(const std::string& name) const {
@@ -20,8 +22,10 @@ double Environment::getNumber(const std::string& name) const {
 // ---------------- Functions ----------------
 void Environment::defineFunction(const std::string& name, const FunctionObject& func) {
     values[name] = func;
+#ifndef NDEBUG
     std::cout << "[env] function " << name << " defined with "
               << func.params.size() << " params" << std::endl;
+#endif
 }
 
 FunctionObject Environment::getFunction(const std::string& name) const {

@@ -23,10 +23,11 @@ enum class TokenType {
     IDENTIFIER, STRING, NUMBER,
 
     // Keywords
-    LET, VAR, FUNC,
+    LET, VAR, FUNC, FUN,
     IF, ELSE, WHILE, FOR, RETURN,
     PRINT, TRUE, FALSE,
     AND, OR, NOT, ASSEMBLE, SUMMON,
+    BREAK, CONTINUE,
 
     // Special
     EOF_TOKEN,
@@ -68,4 +69,4 @@ private:
     void multiLineComment();
 };
 
-#endif 
+#endif  
