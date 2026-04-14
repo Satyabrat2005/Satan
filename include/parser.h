@@ -172,9 +172,9 @@ class FunDecl : public Stmt {
 public:
     Token name;
     std::vector<Token> params;
-    std::unique_ptr<BlockStmt> body;
+    std::shared_ptr<BlockStmt> body;
 
-    FunDecl(Token n, std::vector<Token> p, std::unique_ptr<BlockStmt> b)
+    FunDecl(Token n, std::vector<Token> p, std::shared_ptr<BlockStmt> b)
         : name(std::move(n)), params(std::move(p)), body(std::move(b)) {}
 
     void execute(Environment& env) const override;
