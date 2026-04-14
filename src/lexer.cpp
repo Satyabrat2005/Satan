@@ -25,7 +25,9 @@ Lexer::Lexer(std::string src)
         {"and", TokenType::AND},
         {"or", TokenType::OR},
         {"not", TokenType::NOT},
-        {"assemble", TokenType::ASSEMBLE}
+        {"assemble", TokenType::ASSEMBLE},
+        {"break", TokenType::BREAK},
+        {"continue", TokenType::CONTINUE}
     };
 }
 
