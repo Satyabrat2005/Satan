@@ -1,7 +1,7 @@
 #include "../include/environment.h"
 #include <iostream>
 #include <cassert>
-#include <cmath>
+
 
 int main() {
     // ---- Test: Nested scope variable shadowing ----
