@@ -8,6 +8,21 @@
 #include <vector>
 #include <optional>
 
+// Maximum recursion depth to prevent stack overflow on malformed input
+constexpr int MAX_PARSE_DEPTH = 256;
+
+// Dedicated signal types for break/continue control flow
+// (avoids using std::runtime_error with string matching)
+class BreakSignal : public std::exception {
+public:
+    const char* what() const noexcept override { return "break"; }
+};
+
+class ContinueSignal : public std::exception {
+public:
+    const char* what() const noexcept override { return "continue"; }
+};
+
 // ----------------- Expressions -----------------
 class Expr {
 public:
@@ -224,6 +239,17 @@ public:
 private:
     const std::vector<Token>& tokens;
     int current;
+    int depth = 0;
+
+    // RAII guard for tracking recursion depth
+    struct DepthGuard {
+        int& depth;
+        explicit DepthGuard(int& d) : depth(d) {
+            if (++depth > MAX_PARSE_DEPTH)
+                throw std::runtime_error("Parser error: Maximum nesting depth exceeded.");
+        }
+        ~DepthGuard() { --depth; }
+    };
 
     // ---- Statements ----
     std::unique_ptr<Stmt> declaration();
