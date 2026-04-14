@@ -71,4 +71,4 @@ private:
     void multiLineComment();
 };
 
-#endif    
+#endif  

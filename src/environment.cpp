@@ -1,5 +1,6 @@
 #include "../include/environment.h"
 #include <stdexcept>
+#include <iostream>
 
 // ---------------- Numbers ----------------
 void Environment::define(const std::string& name, double value) {
@@ -8,7 +9,9 @@ void Environment::define(const std::string& name, double value) {
     // Only the current scope's map is written to, so the outer variable
     // remains untouched and becomes visible again once this scope exits.
     if (parent && parent->exists(name)) {
+#ifndef NDEBUG
         std::cout << "[env] variable " << name << " shadows outer variable" << std::endl;
+#endif
     }
     values[name] = value;
 }

@@ -19,7 +19,7 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse() {
 
 std::unique_ptr<Stmt> Parser::declaration() {
     if (match({TokenType::VAR, TokenType::LET})) return varDeclaration();
-    if (match({TokenType::FUN})) return funDeclaration();
+    if (match({TokenType::FUNC, TokenType::FUN})) return funDeclaration();
     return statement();
 }
 
@@ -46,7 +46,13 @@ std::unique_ptr<Stmt> Parser::funDeclaration() {
     consume(TokenType::RIGHT_PAREN, "Expected ')' after parameters.");
 
     consume(TokenType::LEFT_BRACE, "Expected '{' before function body.");
-    auto body = std::unique_ptr<BlockStmt>(static_cast<BlockStmt*>(parseBlock().release()));
+    auto rawBlock = parseBlock().release();
+    auto* blockPtr = dynamic_cast<BlockStmt*>(rawBlock);
+    if (!blockPtr) {
+        delete rawBlock;
+        throw std::runtime_error("Parser error: Expected block statement in function body.");
+    }
+    auto body = std::unique_ptr<BlockStmt>(blockPtr);
 
     return std::make_unique<FunDecl>(name, std::move(parameters), std::move(body));
 }
@@ -165,6 +171,7 @@ std::unique_ptr<Stmt> Parser::returnStatement() {
 
 // ----------------- Expressions -----------------
 std::unique_ptr<Expr> Parser::expression() {
+    DepthGuard guard(depth);
     return logical();
 }
 
@@ -335,10 +342,10 @@ void WhileStmt::execute(Environment& env) const {
         }
         try {
             body->execute(env);
-        } catch (const std::runtime_error& e) {
-            if (std::string(e.what()) == "Break") break;
-            if (std::string(e.what()) == "Continue") continue;
-            throw;
+        } catch (const BreakSignal&) {
+            break;
+        } catch (const ContinueSignal&) {
+            continue;
         }
     }
 }
@@ -352,22 +359,20 @@ void ForStmt::execute(Environment& env) const {
         }
         try {
             body->execute(env);
-        } catch (const std::runtime_error& e) {
-            if (std::string(e.what()) == "Break") break;
-            if (std::string(e.what()) == "Continue") {
-                if (increment) increment->evaluate(env);
-                continue;
-            }
-            throw;
+        } catch (const BreakSignal&) {
+            break;
+        } catch (const ContinueSignal&) {
+            if (increment) increment->evaluate(env);
+            continue;
         }
         if (increment) increment->evaluate(env);
     }
 }
 
 void BreakStmt::execute(Environment&) const {
-    throw std::runtime_error("Break");
+    throw BreakSignal();
 }
 
 void ContinueStmt::execute(Environment&) const {
-    throw std::runtime_error("Continue");
+    throw ContinueSignal();
 }

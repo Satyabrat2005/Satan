@@ -6,13 +6,15 @@
 *.a
 *.so
 *.dylib
+*.dll
 
 # Build directories
 build/
 bin/
 obj/
+cmake-build-*/
 
-# IDE and editor files
+# IDE / Editor files
 .vscode/
 .idea/
 *.swp
@@ -26,3 +28,9 @@ Thumbs.db
 # Debug files
 *.dSYM/
 *.pdb
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key

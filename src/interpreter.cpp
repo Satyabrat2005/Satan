@@ -9,6 +9,10 @@ void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements
         for (const auto& stmt : statements) {
             execute(stmt.get());
         }
+    } catch (const BreakSignal&) {
+        std::cerr << "[runtime error] 'break' used outside of a loop" << std::endl;
+    } catch (const ContinueSignal&) {
+        std::cerr << "[runtime error] 'continue' used outside of a loop" << std::endl;
     } catch (const std::runtime_error& err) {
         std::cerr << "[runtime error] " << err.what() << std::endl;
     }
