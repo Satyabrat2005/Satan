@@ -1,0 +1,5 @@
+//  WORD CLOUD IN SATAN — 3 LINES!
+
+let text = "machine learning deep learning neural networks artificial intelligence data science natural language processing computer vision transformers attention mechanism gradient descent backpropagation convolutional recurrent LSTM GRU encoder decoder embedding tokenization";
+word_cloud(text);
+summon "Word cloud generated!";
