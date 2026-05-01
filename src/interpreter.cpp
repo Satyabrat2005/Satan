@@ -1,10 +1,21 @@
 #include "../include/interpreter.h"
+#include "../include/stdlib_ml.h"
 #include <iostream>
 
-Interpreter::Interpreter() : env() {}
+Interpreter* Interpreter::current = nullptr;
 
+Interpreter::Interpreter() : env(), bridge() {
+    current = this;
+    bridge.initSession();
+    registerBuiltins();
+}
+
+void Interpreter::registerBuiltins() {
+    registerMLBuiltins(env, bridge);
+}
 
 void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements) {
+    current = this;
     try {
         for (const auto& stmt : statements) {
             execute(stmt.get());
@@ -29,7 +40,7 @@ void Interpreter::executeBlock(const std::vector<std::unique_ptr<Stmt>>& stateme
     }
 }
 
-double Interpreter::evaluate(const Expr* expr) {
-    if (!expr) return 0;
+SatanValue Interpreter::evaluate(const Expr* expr) {
+    if (!expr) return SatanValue();
     return expr->evaluate(env);
 }
