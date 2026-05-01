@@ -1,0 +1,8 @@
+//  FULL ML PIPELINE IN SATAN — 7 LINES!
+let data = load_csv("data.csv");
+data.describe();
+let model = RandomForest();
+model.fit(data);
+summon "Score: " + str(model.score());
+data.corr();
+model.plot();
