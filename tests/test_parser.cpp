@@ -13,9 +13,9 @@ int main() {
 
     if (expr) {
         expr->print();
-        std::cout << "\n✅ Parser test passed!\n";
+        std::cout << "\n Parser test passed!\n";
     } else {
-        std::cerr << "❌ Parser returned null.\n";
+        std::cerr << " Parser returned null.\n";
         return 1;
     }
 
