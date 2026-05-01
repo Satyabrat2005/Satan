@@ -1,0 +1,8 @@
+// Hyperparameter tuning — auto optimize any model
+let data = load_csv("data.csv");
+let model = RandomForest();
+model.fit(data);
+summon "Tuning hyperparameters...";
+model.tune(data);
+model.plot();
+model.feature_importance();
