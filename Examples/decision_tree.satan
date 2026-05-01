@@ -1,0 +1,8 @@
+//  DECISION TREE IN SATAN — 5 LINES!
+
+
+let data = load_csv("data.csv");
+let model = DecisionTree();
+model.fit(data);
+summon "Accuracy: " + str(model.score());
+model.plot();
