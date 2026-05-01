@@ -1,0 +1,8 @@
+//  LOGISTIC REGRESSION IN SATAN — 6 LINES!
+
+let data = load_csv("data.csv");
+let model = LogisticRegression();
+model.fit(data);
+let acc = model.score();
+summon "Logistic Regression Accuracy: " + str(acc);
+model.plot();
