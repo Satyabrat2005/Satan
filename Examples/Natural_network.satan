@@ -1,0 +1,8 @@
+//  NEURAL NETWORK IN SATAN — 7 LINES!
+
+let data = load_csv("data.csv");
+let net = NeuralNet([4, 64, 32, 3]);
+net.train(data, epochs=100, lr=0.01);
+summon "Training complete!";
+net.plot_loss();
+summon "Neural network ready!";
