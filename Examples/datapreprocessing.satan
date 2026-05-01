@@ -1,0 +1,12 @@
+// Data preprocessing pipeline
+let data = load_csv("data.csv");
+summon "Raw data:";
+data.head();
+summon "Filling missing values...";
+data.fill_missing();
+summon "Normalizing features...";
+data.normalize();
+summon "Preprocessing complete! Training model...";
+let model = GradientBoosting();
+model.fit(data);
+model.plot();
