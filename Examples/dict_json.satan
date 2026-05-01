@@ -1,0 +1,31 @@
+// Dictionary + JSON + File I/O Demo
+summon " Dictionary + JSON + File I/O ";
+
+// Create a dictionary
+let config = {"name": "Satan ML", "version": 2.0, "features": 42};
+summon "Config: " + str(config);
+summon "Name: " + config["name"];
+summon "Keys: " + str(config.keys());
+summon "Values: " + str(config.values());
+summon "Has name: " + str(config.has("name"));
+summon "Size: " + str(config.size());
+
+// JSON round-trip
+let json_str = json_stringify(config);
+summon "JSON: " + json_str;
+
+let parsed = json_parse(json_str);
+summon "Parsed name: " + parsed["name"];
+
+// File I/O
+write_file("test_output.txt", "Hello from Satan! Line 2");
+let content = read_file("test_output.txt");
+summon "File content: " + content;
+summon "File exists: " + str(file_exists("test_output.txt"));
+summon "Missing file: " + str(file_exists("nope.txt"));
+
+// Nested JSON
+let json2 = "{\"count\": 2, \"active\": true}";
+let complex = json_parse(json2);
+summon "Count: " + str(complex["count"]);
+summon "Active: " + str(complex["active"]);
