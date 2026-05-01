@@ -9,25 +9,36 @@
 enum class TokenType {
     // Single-character tokens
     LEFT_PAREN, RIGHT_PAREN,
-    LEFT_BRACE, RIGHT_BRACE, // for blocks
-    COMMA, DOT, SEMICOLON,
-    PLUS, MINUS, STAR, SLASH,
+    LEFT_BRACE, RIGHT_BRACE,
+    LEFT_BRACKET, RIGHT_BRACKET,
+    COMMA, DOT, SEMICOLON, COLON,
+    PLUS, MINUS, STAR, SLASH, PERCENT,
     BANG, EQUAL,
     LESS, GREATER,
 
     // One or two character tokens
     BANG_EQUAL, EQUAL_EQUAL,
     LESS_EQUAL, GREATER_EQUAL,
+    ARROW,      // =>
+    PIPE_ARROW, // |>
 
     // Literals
     IDENTIFIER, STRING, NUMBER,
 
-    // Keywords
+    // Core keywords
     LET, VAR, FUNC, FUN,
     IF, ELSE, WHILE, FOR, RETURN,
     PRINT, TRUE, FALSE,
     AND, OR, NOT, ASSEMBLE, SUMMON,
     BREAK, CONTINUE,
+
+    // AI/ML/DL/NLP/DS keywords
+    IMPORT,
+
+    // Phase 1: Core language expansion
+    TRY, CATCH,
+    IN,
+    ASSERT, TEST,
 
     // Special
     EOF_TOKEN,
@@ -44,7 +55,7 @@ struct Token {
 
 class Lexer {
 public:
-    static constexpr size_t MAX_SOURCE_SIZE = 10 * 1024 * 1024; // 10 MB
+    static constexpr size_t MAX_SOURCE_SIZE = 10 * 1024 * 1024;
 
     explicit Lexer(std::string src);
     std::vector<Token> scanTokens();
@@ -71,4 +82,4 @@ private:
     void multiLineComment();
 };
 
-#endif  
+#endif
