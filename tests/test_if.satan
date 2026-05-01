@@ -3,9 +3,8 @@ summon "   SATAN LINEAR REGRESSION (STABLE VERSION)";
 summon "============================================";
 summon "";
 
-// =========================
 // DATASET
-// =========================
+
 
 let n = 8;
 
@@ -18,10 +17,7 @@ let x5 = 6; let y5 = 12.3;
 let x6 = 7; let y6 = 13.9;
 let x7 = 8; let y7 = 16.1;
 
-// =========================
 // STEP 1: SUMS
-// =========================
-
 let sum_x = x0+x1+x2+x3+x4+x5+x6+x7;
 let sum_y = y0+y1+y2+y3+y4+y5+y6+y7;
 
@@ -38,10 +34,7 @@ summon "sum_xx ="; summon sum_xx;
 
 summon "";
 
-// =========================
 // STEP 2: MODEL
-// =========================
-
 let numerator   = n*sum_xy - sum_x*sum_y;
 let denominator = n*sum_xx - sum_x*sum_x;
 
@@ -55,8 +48,6 @@ summon "b ="; summon b;
 summon "";
 
 // STEP 3: PREDICTIONS
-
-
 let p0 = m*x0 + b;
 let p1 = m*x1 + b;
 let p2 = m*x2 + b;
@@ -78,10 +69,7 @@ summon "x=8 ->"; summon p7;
 
 summon "";
 
-// =========================
 // STEP 4: ERROR (MSE)
-// =========================
-
 let e0 = y0 - p0; let e0sq = e0*e0;
 let e1 = y1 - p1; let e1sq = e1*e1;
 let e2 = y2 - p2; let e2sq = e2*e2;
@@ -98,10 +86,7 @@ summon "MSE ="; summon mse;
 
 summon "";
 
-// =========================
 // STEP 5: R^2
-// =========================
-
 let mean_y = sum_y / n;
 
 let t0 = y0 - mean_y; let t0sq = t0*t0;
@@ -124,10 +109,7 @@ let r2 = 1 - ss_res / ss_tot;
 summon "R^2 ="; summon r2;
 
 summon "";
-
-// =========================
 // STEP 6: FUTURE PREDICTIONS
-// =========================
 
 let f10  = m*10  + b;
 let f20  = m*20  + b;
