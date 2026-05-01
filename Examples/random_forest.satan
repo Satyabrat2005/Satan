@@ -1,0 +1,8 @@
+//  RANDOM FOREST IN SATAN — 6 LINES!
+
+let data = load_csv("data.csv");
+let model = RandomForest();
+model.fit(data);
+let score = model.score();
+summon "Random Forest Accuracy: " + str(score);
+model.plot();
