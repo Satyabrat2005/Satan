@@ -307,7 +307,6 @@ TEST_CASE("Inner scope shadows outer and outer unchanged after inner exits", "[e
     REQUIRE(outer.exists("x"));
     REQUIRE(outer.getNumber("x") == 10.0);
 }
-
 TEST_CASE("exists walks the full ancestor chain", "[environment][nested]") {
     Environment level0;
     level0.define("root_var", 0.0);
