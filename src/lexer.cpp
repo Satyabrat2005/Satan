@@ -3,11 +3,9 @@
 #include <cctype>
 #include <stdexcept>
 
-// Token constructor
 Token::Token(TokenType t, std::string lex, int ln)
     : type(t), lexeme(std::move(lex)), line(ln) {}
 
-// Lexer constructor (initialize variables and keywords)
 Lexer::Lexer(std::string src)
     : source(std::move(src)), start(0), current(0), line(1) {
     if (source.size() > MAX_SOURCE_SIZE) {
@@ -32,7 +30,13 @@ Lexer::Lexer(std::string src)
         {"assemble", TokenType::ASSEMBLE},
         {"break", TokenType::BREAK},
         {"continue", TokenType::CONTINUE},
-        {"fun", TokenType::FUN}
+        {"fun", TokenType::FUN},
+        {"import", TokenType::IMPORT},
+        {"try", TokenType::TRY},
+        {"catch", TokenType::CATCH},
+        {"in", TokenType::IN},
+        {"assert", TokenType::ASSERT},
+        {"test", TokenType::TEST}
     };
 }
 
@@ -56,23 +60,39 @@ void Lexer::scanToken() {
         case ')': addToken(TokenType::RIGHT_PAREN); break;
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
+        case '[': addToken(TokenType::LEFT_BRACKET); break;
+        case ']': addToken(TokenType::RIGHT_BRACKET); break;
         case ',': addToken(TokenType::COMMA); break;
         case '.': addToken(TokenType::DOT); break;
         case '-': addToken(TokenType::MINUS); break;
         case '+': addToken(TokenType::PLUS); break;
         case ';': addToken(TokenType::SEMICOLON); break;
         case '*': addToken(TokenType::STAR); break;
+        case '%': addToken(TokenType::PERCENT); break;
+        case ':': addToken(TokenType::COLON); break;
         case '!':
             addToken(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
             break;
         case '=':
-            addToken(match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+            if (match('>')) {
+                addToken(TokenType::ARROW);
+            } else {
+                addToken(match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+            }
             break;
         case '<':
             addToken(match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
             break;
         case '>':
             addToken(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
+            break;
+        case '|':
+            if (match('>')) {
+                addToken(TokenType::PIPE_ARROW);
+            } else {
+                std::cerr << "[Line " << line << "] Unexpected character: " << c << "\n";
+                addToken(TokenType::ERROR);
+            }
             break;
         case '/':
             if (match('/')) {
@@ -106,9 +126,7 @@ void Lexer::scanToken() {
     }
 }
 
-char Lexer::advance() {
-    return source[current++];
-}
+char Lexer::advance() { return source[current++]; }
 
 bool Lexer::match(char expected) {
     if (isAtEnd()) return false;
@@ -137,35 +155,28 @@ void Lexer::string() {
         if (peek() == '\n') line++;
         advance();
     }
-
     if (isAtEnd()) {
         std::cerr << "[Line " << line << "] Unterminated string.\n";
         addToken(TokenType::ERROR);
         return;
     }
-
-    advance(); 
-
+    advance();
     std::string value = source.substr(start + 1, current - start - 2);
     tokens.emplace_back(TokenType::STRING, value, line);
 }
 
 void Lexer::number() {
     while (isdigit(peek())) advance();
-
     if (peek() == '.' && isdigit(peekNext())) {
         advance();
-
         while (isdigit(peek())) advance();
     }
-
     std::string value = source.substr(start, current - start);
     tokens.emplace_back(TokenType::NUMBER, value, line);
 }
 
 void Lexer::identifier() {
     while (isalnum(peek()) || peek() == '_') advance();
-
     std::string text = source.substr(start, current - start);
     auto keyword = keywords.find(text);
     if (keyword != keywords.end()) {
@@ -184,6 +195,6 @@ void Lexer::multiLineComment() {
         std::cerr << "[Line " << line << "] Unterminated multi-line comment.\n";
         return;
     }
-    advance(); 
-    advance(); 
+    advance();
+    advance();
 }
