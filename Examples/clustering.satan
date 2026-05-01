@@ -1,0 +1,7 @@
+//  K-MEANS CLUSTERING IN SATAN — 5 LINES!
+
+let data = load_csv("data.csv");
+let model = KMeans(3);
+model.fit(data);
+summon model.score();
+model.plot();
