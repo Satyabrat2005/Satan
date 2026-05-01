@@ -1,0 +1,10 @@
+// Model persistence — save and reload trained models
+let data = load_csv("data.csv");
+let model = RandomForest();
+model.fit(data);
+summon "Saving model to disk...";
+model.save("my_model.smodel");
+summon "Loading model from disk...";
+let loaded = load_model("my_model.smodel");
+loaded.score();
+loaded.plot();
