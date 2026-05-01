@@ -1,0 +1,7 @@
+//  SENTIMENT ANALYSIS IN SATAN — 4 LINES!
+
+let score = sentiment("I absolutely love this product! Best purchase ever!");
+summon "Sentiment score: " + str(score);
+
+let score2 = sentiment("This is terrible, worst experience of my life.");
+summon "Sentiment score: " + str(score2);
