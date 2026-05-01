@@ -1,0 +1,17 @@
+// Try/Catch — error handling
+summon "Try/Catch Demo ";
+
+try {
+    let x = 10 / 0;
+    summon "This shouldn't crash anymore";
+} catch (e) {
+    summon "Caught error: " + e;
+}
+
+try {
+    let data = load_csv("nonexistent_file.csv");
+} catch {
+    summon "File not found — handled gracefully!";
+}
+
+summon "Program continues after errors!";
