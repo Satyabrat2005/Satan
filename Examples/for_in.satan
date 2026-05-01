@@ -1,0 +1,33 @@
+// For..In Loops + Array methods
+summon "For..In + Array Methods";
+
+let fruits = ["apple", "banana", "cherry", "date", "elderberry"];
+summon "Fruits:";
+for (let fruit in fruits) {
+    summon "  - " + fruit;
+}
+
+// Map — transform each element
+let lengths = fruits.map(fun(f) { return len(f); });
+summon "Lengths: " + str(lengths);
+
+// Filter — keep only long names
+let long_fruits = fruits.filter(fun(f) { return len(f) > 5; });
+summon "Long fruits: " + str(long_fruits);
+
+// Sort + Reverse + Join
+let sorted = fruits.sort();
+summon "Sorted: " + sorted.join(", ");
+summon "Reversed: " + fruits.reverse().join(", ");
+
+// Slice
+summon "First 3: " + str(fruits.slice(0, 3));
+
+// Range
+summon "Range(5): " + str(range(5));
+summon "Range(2,8): " + str(range(2, 8));
+summon "Range(0,10,2): " + str(range(0, 10, 2));
+
+// Contains + IndexOf
+summon "Has banana: " + str(fruits.contains("banana"));
+summon "Index of cherry: " + str(fruits.indexOf("cherry"));
