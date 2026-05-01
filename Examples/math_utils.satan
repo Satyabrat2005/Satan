@@ -1,0 +1,13 @@
+// Helper functions for import demo
+func greet(name) {
+    return "Hello, " + name + "!";
+}
+
+func add(a, b) {
+    return a + b;
+}
+
+func factorial(n) {
+    if (n <= 1) { return 1; }
+    return n * factorial(n - 1);
+}
