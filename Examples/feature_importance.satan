@@ -1,0 +1,8 @@
+// Advanced visualizations — feature importance, ROC, learning curve
+let data = load_csv("data.csv");
+let model = RandomForest();
+model.fit(data);
+summon "Generating advanced plots...";
+model.feature_importance();
+model.roc_curve();
+model.learning_curve();
