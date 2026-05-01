@@ -1,0 +1,11 @@
+// XGBoost and LightGBM — state of the art boosting models
+let data = load_csv("data.csv");
+summon "=== XGBoost ===";
+let xgb = XGBoost();
+xgb.fit(data);
+xgb.feature_importance();
+xgb.roc_curve();
+summon "=== LightGBM ===";
+let lgbm = LightGBM();
+lgbm.fit(data);
+lgbm.feature_importance();
