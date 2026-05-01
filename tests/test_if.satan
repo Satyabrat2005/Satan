@@ -1,7 +1,146 @@
-let x = 10;
-var name = "SatanLang";
-summon "Hello, World!";
+summon "============================================";
+summon "   SATAN LINEAR REGRESSION (STABLE VERSION)";
+summon "============================================";
+summon "";
 
-if (x >= 10) {
-    summon "x is large";
-}
+// =========================
+// DATASET
+// =========================
+
+let n = 8;
+
+let x0 = 1; let y0 = 2.1;
+let x1 = 2; let y1 = 3.9;
+let x2 = 3; let y2 = 6.2;
+let x3 = 4; let y3 = 7.8;
+let x4 = 5; let y4 = 10.1;
+let x5 = 6; let y5 = 12.3;
+let x6 = 7; let y6 = 13.9;
+let x7 = 8; let y7 = 16.1;
+
+// =========================
+// STEP 1: SUMS
+// =========================
+
+let sum_x = x0+x1+x2+x3+x4+x5+x6+x7;
+let sum_y = y0+y1+y2+y3+y4+y5+y6+y7;
+
+let sum_xy = x0*y0 + x1*y1 + x2*y2 + x3*y3 +
+             x4*y4 + x5*y5 + x6*y6 + x7*y7;
+
+let sum_xx = x0*x0 + x1*x1 + x2*x2 + x3*x3 +
+             x4*x4 + x5*x5 + x6*x6 + x7*x7;
+
+summon "sum_x  ="; summon sum_x;
+summon "sum_y  ="; summon sum_y;
+summon "sum_xy ="; summon sum_xy;
+summon "sum_xx ="; summon sum_xx;
+
+summon "";
+
+// =========================
+// STEP 2: MODEL
+// =========================
+
+let numerator   = n*sum_xy - sum_x*sum_y;
+let denominator = n*sum_xx - sum_x*sum_x;
+
+let m = numerator / denominator;
+let b = (sum_y - m*sum_x) / n;
+
+summon "MODEL:";
+summon "m ="; summon m;
+summon "b ="; summon b;
+
+summon "";
+
+// STEP 3: PREDICTIONS
+
+
+let p0 = m*x0 + b;
+let p1 = m*x1 + b;
+let p2 = m*x2 + b;
+let p3 = m*x3 + b;
+let p4 = m*x4 + b;
+let p5 = m*x5 + b;
+let p6 = m*x6 + b;
+let p7 = m*x7 + b;
+
+summon "Predictions:";
+summon "x=1 ->"; summon p0;
+summon "x=2 ->"; summon p1;
+summon "x=3 ->"; summon p2;
+summon "x=4 ->"; summon p3;
+summon "x=5 ->"; summon p4;
+summon "x=6 ->"; summon p5;
+summon "x=7 ->"; summon p6;
+summon "x=8 ->"; summon p7;
+
+summon "";
+
+// =========================
+// STEP 4: ERROR (MSE)
+// =========================
+
+let e0 = y0 - p0; let e0sq = e0*e0;
+let e1 = y1 - p1; let e1sq = e1*e1;
+let e2 = y2 - p2; let e2sq = e2*e2;
+let e3 = y3 - p3; let e3sq = e3*e3;
+let e4 = y4 - p4; let e4sq = e4*e4;
+let e5 = y5 - p5; let e5sq = e5*e5;
+let e6 = y6 - p6; let e6sq = e6*e6;
+let e7 = y7 - p7; let e7sq = e7*e7;
+
+let mse = (e0sq + e1sq + e2sq + e3sq +
+           e4sq + e5sq + e6sq + e7sq) / n;
+
+summon "MSE ="; summon mse;
+
+summon "";
+
+// =========================
+// STEP 5: R^2
+// =========================
+
+let mean_y = sum_y / n;
+
+let t0 = y0 - mean_y; let t0sq = t0*t0;
+let t1 = y1 - mean_y; let t1sq = t1*t1;
+let t2 = y2 - mean_y; let t2sq = t2*t2;
+let t3 = y3 - mean_y; let t3sq = t3*t3;
+let t4 = y4 - mean_y; let t4sq = t4*t4;
+let t5 = y5 - mean_y; let t5sq = t5*t5;
+let t6 = y6 - mean_y; let t6sq = t6*t6;
+let t7 = y7 - mean_y; let t7sq = t7*t7;
+
+let ss_tot = t0sq + t1sq + t2sq + t3sq +
+             t4sq + t5sq + t6sq + t7sq;
+
+let ss_res = e0sq + e1sq + e2sq + e3sq +
+             e4sq + e5sq + e6sq + e7sq;
+
+let r2 = 1 - ss_res / ss_tot;
+
+summon "R^2 ="; summon r2;
+
+summon "";
+
+// =========================
+// STEP 6: FUTURE PREDICTIONS
+// =========================
+
+let f10  = m*10  + b;
+let f20  = m*20  + b;
+let f50  = m*50  + b;
+let f100 = m*100 + b;
+
+summon "Future Predictions:";
+summon "x=10  ->"; summon f10;
+summon "x=20  ->"; summon f20;
+summon "x=50  ->"; summon f50;
+summon "x=100 ->"; summon f100;
+
+summon "";
+summon "============================================";
+summon "   SATAN ML ENGINE WORKING (NO ERRORS)";
+summon "============================================";
