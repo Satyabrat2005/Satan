@@ -1,0 +1,8 @@
+// AutoML — finds the best model automatically
+let data = load_csv("data.csv");
+summon "Running AutoML on data...";
+let best = AutoML.find_best(data);
+summon "Best model found! Generating plots...";
+best.plot();
+best.feature_importance();
+best.roc_curve();
