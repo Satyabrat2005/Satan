@@ -1,0 +1,62 @@
+//  SATAN LANGUAGE DEMO — Showcasing Core + AI/ML Features
+
+//Core Language Features
+summon "SATAN CORE FEATURES";
+
+// Variables and arithmetic
+let x = 42;
+let y = 3.14;
+summon "x = " + str(x) + ", y = " + str(y);
+summon "x + y = " + str(x + y);
+summon "x * y = " + str(x * y);
+
+// Strings
+let greeting = "Hello, Satan!";
+summon greeting;
+summon "Length: " + str(len(greeting));
+summon "Upper: " + greeting.upper();
+
+// Arrays
+let arr = [10, 20, 30, 40, 50];
+summon "Array: " + str(arr);
+summon "Length: " + str(arr.length);
+summon "First: " + str(arr[0]);
+summon "Last: " + str(arr[4]);
+
+// Math functions
+summon "sqrt(144) = " + str(sqrt(144));
+summon "pow(2, 10) = " + str(pow(2, 10));
+summon "abs(-42) = " + str(abs(-42));
+
+// Control flow
+if (x > 40) {
+    summon "x is greater than 40!";
+} else {
+    summon "x is 40 or less.";
+}
+
+// Loops
+let sum = 0;
+var i = 0;
+for (var i = 0; i < 5; i = i + 1) {
+    sum = sum + arr[i];
+}
+summon "Sum of array: " + str(sum);
+
+// Functions
+func factorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+summon "10! = " + str(factorial(10));
+
+// Range
+let nums = range(5);
+summon "range(5) = " + str(nums);
+
+summon "";
+summon "=== SATAN AI/ML READY ===";
+summon "Use: load_csv(), LinearRegression(), NeuralNet(), sentiment()";
+summon "Type 'help' in REPL for full function list.";
