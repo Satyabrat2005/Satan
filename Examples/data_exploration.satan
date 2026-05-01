@@ -1,0 +1,8 @@
+//  DATA EXPLORATION IN SATAN — 6 LINES!
+
+let data = load_csv("data.csv");
+data.head(10);
+data.describe();
+data.shape();
+data.corr();
+data.plot();
