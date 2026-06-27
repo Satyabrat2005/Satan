@@ -209,3 +209,25 @@ namespace Catch {
 #if defined(__MINGW32__)
 #    define CATCH_INTERNAL_CONFIG_NO_WINDOWS_SEH
 #endif
+////////////////////////////////////////////////////////////////////////////////
+// PS4
+#if defined(__ORBIS__)
+#    define CATCH_INTERNAL_CONFIG_NO_NEW_CAPTURE
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+// Cygwin
+#ifdef __CYGWIN__
+
+// Required for some versions of Cygwin to declare gettimeofday
+// see: http://stackoverflow.com/questions/36901803/gettimeofday-not-declared-in-this-scope-cygwin
+#   define _BSD_SOURCE
+// some versions of cygwin (most) do not support std::to_string. Use the libstd check.
+// https://gcc.gnu.org/onlinedocs/gcc-4.8.2/libstdc++/api/a01053_source.html line 2812-2813
+# if !((__cplusplus >= 201103L) && defined(_GLIBCXX_USE_C99) \
+           && !defined(_GLIBCXX_HAVE_BROKEN_VSWPRINTF))
+
+#    define CATCH_INTERNAL_CONFIG_NO_CPP11_TO_STRING
+
+# endif
+#endif // __CYGWIN__
