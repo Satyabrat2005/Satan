@@ -83,3 +83,53 @@
 #elif defined(WIN32) || defined(__WIN32__) || defined(_WIN32) || defined(_MSC_VER) || defined(__MINGW32__)
 #  define CATCH_PLATFORM_WINDOWS
 #endif
+// end catch_platform.h
+
+#ifdef CATCH_IMPL
+#  ifndef CLARA_CONFIG_MAIN
+#    define CLARA_CONFIG_MAIN_NOT_DEFINED
+#    define CLARA_CONFIG_MAIN
+#  endif
+#endif
+
+// start catch_user_interfaces.h
+
+namespace Catch {
+    unsigned int rngSeed();
+}
+
+// end catch_user_interfaces.h
+// start catch_tag_alias_autoregistrar.h
+
+// start catch_common.h
+
+// start catch_compiler_capabilities.h
+
+// Detect a number of compiler features - by compiler
+// The following features are defined:
+//
+// CATCH_CONFIG_COUNTER : is the __COUNTER__ macro supported?
+// CATCH_CONFIG_WINDOWS_SEH : is Windows SEH supported?
+// CATCH_CONFIG_POSIX_SIGNALS : are POSIX signals supported?
+// CATCH_CONFIG_DISABLE_EXCEPTIONS : Are exceptions enabled?
+// ****************
+// Note to maintainers: if new toggles are added please document them
+// in configuration.md, too
+// ****************
+
+// In general each macro has a _NO_<feature name> form
+// (e.g. CATCH_CONFIG_NO_POSIX_SIGNALS) which disables the feature.
+// Many features, at point of detection, define an _INTERNAL_ macro, so they
+// can be combined, en-mass, with the _NO_ forms later.
+
+#ifdef __cplusplus
+
+#  if (__cplusplus >= 201402L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L)
+#    define CATCH_CPP14_OR_GREATER
+#  endif
+
+#  if (__cplusplus >= 201703L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+#    define CATCH_CPP17_OR_GREATER
+#  endif
+
+#endif
