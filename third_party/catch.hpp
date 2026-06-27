@@ -3048,3 +3048,54 @@ namespace Detail {
         // Validates the new epsilon (0 < epsilon < 1)
         // out-of-line to avoid including stdexcept in the header
         void setEpsilon(double epsilon);
+
+    public:
+        explicit Approx ( double value );
+
+        static Approx custom();
+
+        Approx operator-() const;
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        Approx operator()( T const& value ) const {
+            Approx approx( static_cast<double>(value) );
+            approx.m_epsilon = m_epsilon;
+            approx.m_margin = m_margin;
+            approx.m_scale = m_scale;
+            return approx;
+        }
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        explicit Approx( T const& value ): Approx(static_cast<double>(value))
+        {}
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        friend bool operator == ( const T& lhs, Approx const& rhs ) {
+            auto lhs_v = static_cast<double>(lhs);
+            return rhs.equalityComparisonImpl(lhs_v);
+        }
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        friend bool operator == ( Approx const& lhs, const T& rhs ) {
+            return operator==( rhs, lhs );
+        }
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        friend bool operator != ( T const& lhs, Approx const& rhs ) {
+            return !operator==( lhs, rhs );
+        }
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        friend bool operator != ( Approx const& lhs, T const& rhs ) {
+            return !operator==( rhs, lhs );
+        }
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        friend bool operator <= ( T const& lhs, Approx const& rhs ) {
+            return static_cast<double>(lhs) < rhs.m_value || lhs == rhs;
+        }
+
+        template <typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+        friend bool operator <= ( Approx const& lhs, T const& rhs ) {
+            return lhs.m_value < static_cast<double>(rhs) || lhs == rhs;
+        }
