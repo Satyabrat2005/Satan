@@ -2111,3 +2111,34 @@ struct ratio_string<std::milli> {
     struct StringMaker<std::chrono::time_point<std::chrono::system_clock, Duration>> {
         static std::string convert(std::chrono::time_point<std::chrono::system_clock, Duration> const& time_point) {
             auto converted = std::chrono::system_clock::to_time_t(time_point);
+#ifdef _MSC_VER
+            std::tm timeInfo = {};
+            gmtime_s(&timeInfo, &converted);
+#else
+            std::tm* timeInfo = std::gmtime(&converted);
+#endif
+
+            auto const timeStampSize = sizeof("2017-01-16T17:06:45Z");
+            char timeStamp[timeStampSize];
+            const char * const fmt = "%Y-%m-%dT%H:%M:%SZ";
+
+#ifdef _MSC_VER
+            std::strftime(timeStamp, timeStampSize, fmt, &timeInfo);
+#else
+            std::strftime(timeStamp, timeStampSize, fmt, timeInfo);
+#endif
+            return std::string(timeStamp);
+        }
+    };
+}
+#endif // CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER
+
+#define INTERNAL_CATCH_REGISTER_ENUM( enumName, ... ) \
+namespace Catch { \
+    template<> struct StringMaker<enumName> { \
+        static std::string convert( enumName value ) { \
+            static const auto& enumInfo = ::Catch::getMutableRegistryHub().getMutableEnumValuesRegistry().registerEnum( #enumName, #__VA_ARGS__, { __VA_ARGS__ } ); \
+            return static_cast<std::string>(enumInfo.lookup( static_cast<int>( value ) )); \
+        } \
+    }; \
+}
