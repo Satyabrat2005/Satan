@@ -2818,3 +2818,36 @@ namespace Catch {
 
 // end catch_totals.h
 #include <string>
+
+namespace Catch {
+
+    struct SectionInfo {
+        SectionInfo
+            (   SourceLineInfo const& _lineInfo,
+                std::string const& _name );
+
+        // Deprecated
+        SectionInfo
+            (   SourceLineInfo const& _lineInfo,
+                std::string const& _name,
+                std::string const& ) : SectionInfo( _lineInfo, _name ) {}
+
+        std::string name;
+        std::string description; // !Deprecated: this will always be empty
+        SourceLineInfo lineInfo;
+    };
+
+    struct SectionEndInfo {
+        SectionInfo sectionInfo;
+        Counts prevAssertions;
+        double durationInSeconds;
+    };
+
+} // end namespace Catch
+
+// end catch_section_info.h
+// start catch_timer.h
+
+#include <cstdint>
+
+namespace Catch {
