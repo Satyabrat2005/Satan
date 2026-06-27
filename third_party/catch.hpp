@@ -1360,3 +1360,33 @@ namespace Catch {
 } // end namespace Catch
 
 // end catch_result_type.h
+namespace Catch {
+
+    struct AssertionInfo
+    {
+        StringRef macroName;
+        SourceLineInfo lineInfo;
+        StringRef capturedExpression;
+        ResultDisposition::Flags resultDisposition;
+
+        // We want to delete this constructor but a compiler bug in 4.8 means
+        // the struct is then treated as non-aggregate
+        //AssertionInfo() = delete;
+    };
+
+} // end namespace Catch
+
+// end catch_assertioninfo.h
+// start catch_decomposer.h
+
+// start catch_tostring.h
+
+#include <vector>
+#include <cstddef>
+#include <type_traits>
+#include <string>
+// start catch_stream.h
+
+#include <iosfwd>
+#include <cstddef>
+#include <ostream>
