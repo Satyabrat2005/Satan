@@ -4663,3 +4663,36 @@ public:
         return m_current != m_elems.size();
     }
 };
+
+template <typename InputIterator,
+          typename InputSentinel,
+          typename ResultType = typename std::iterator_traits<InputIterator>::value_type>
+GeneratorWrapper<ResultType> from_range(InputIterator from, InputSentinel to) {
+    return GeneratorWrapper<ResultType>(pf::make_unique<IteratorGenerator<ResultType>>(from, to));
+}
+
+template <typename Container,
+          typename ResultType = typename Container::value_type>
+GeneratorWrapper<ResultType> from_range(Container const& cnt) {
+    return GeneratorWrapper<ResultType>(pf::make_unique<IteratorGenerator<ResultType>>(cnt.begin(), cnt.end()));
+}
+
+} // namespace Generators
+} // namespace Catch
+
+// end catch_generators_specific.hpp
+
+// These files are included here so the single_include script doesn't put them
+// in the conditionally compiled sections
+// start catch_test_case_info.h
+
+#include <string>
+#include <vector>
+#include <memory>
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
+namespace Catch {
