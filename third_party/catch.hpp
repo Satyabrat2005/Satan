@@ -3879,3 +3879,51 @@ namespace Generators {
         virtual T const& get() const = 0;
         using type = T;
     };
+
+    template<typename T>
+    class SingleValueGenerator final : public IGenerator<T> {
+        T m_value;
+    public:
+        SingleValueGenerator(T&& value) : m_value(std::move(value)) {}
+
+        T const& get() const override {
+            return m_value;
+        }
+        bool next() override {
+            return false;
+        }
+    };
+
+    template<typename T>
+    class FixedValuesGenerator final : public IGenerator<T> {
+        static_assert(!std::is_same<T, bool>::value,
+            "FixedValuesGenerator does not support bools because of std::vector<bool>"
+            "specialization, use SingleValue Generator instead.");
+        std::vector<T> m_values;
+        size_t m_idx = 0;
+    public:
+        FixedValuesGenerator( std::initializer_list<T> values ) : m_values( values ) {}
+
+        T const& get() const override {
+            return m_values[m_idx];
+        }
+        bool next() override {
+            ++m_idx;
+            return m_idx < m_values.size();
+        }
+    };
+
+    template <typename T>
+    class GeneratorWrapper final {
+        std::unique_ptr<IGenerator<T>> m_generator;
+    public:
+        GeneratorWrapper(std::unique_ptr<IGenerator<T>> generator):
+            m_generator(std::move(generator))
+        {}
+        T const& get() const {
+            return m_generator->get();
+        }
+        bool next() {
+            return m_generator->next();
+        }
+    };
