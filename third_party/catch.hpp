@@ -5014,3 +5014,89 @@ namespace Catch
             WildcardAtEnd = 2,
             WildcardAtBothEnds = WildcardAtStart | WildcardAtEnd
         };
+
+    public:
+
+        WildcardPattern( std::string const& pattern, CaseSensitive::Choice caseSensitivity );
+        virtual ~WildcardPattern() = default;
+        virtual bool matches( std::string const& str ) const;
+
+    private:
+        std::string normaliseString( std::string const& str ) const;
+        CaseSensitive::Choice m_caseSensitivity;
+        WildcardPosition m_wildcard = NoWildcard;
+        std::string m_pattern;
+    };
+}
+
+// end catch_wildcard_pattern.h
+#include <string>
+#include <vector>
+#include <memory>
+
+namespace Catch {
+
+    struct IConfig;
+
+    class TestSpec {
+        class Pattern {
+        public:
+            explicit Pattern( std::string const& name );
+            virtual ~Pattern();
+            virtual bool matches( TestCaseInfo const& testCase ) const = 0;
+            std::string const& name() const;
+        private:
+            std::string const m_name;
+        };
+        using PatternPtr = std::shared_ptr<Pattern>;
+
+        class NamePattern : public Pattern {
+        public:
+            explicit NamePattern( std::string const& name, std::string const& filterString );
+            bool matches( TestCaseInfo const& testCase ) const override;
+        private:
+            WildcardPattern m_wildcardPattern;
+        };
+
+        class TagPattern : public Pattern {
+        public:
+            explicit TagPattern( std::string const& tag, std::string const& filterString );
+            bool matches( TestCaseInfo const& testCase ) const override;
+        private:
+            std::string m_tag;
+        };
+
+        class ExcludedPattern : public Pattern {
+        public:
+            explicit ExcludedPattern( PatternPtr const& underlyingPattern );
+            bool matches( TestCaseInfo const& testCase ) const override;
+        private:
+            PatternPtr m_underlyingPattern;
+        };
+
+        struct Filter {
+            std::vector<PatternPtr> m_patterns;
+
+            bool matches( TestCaseInfo const& testCase ) const;
+            std::string name() const;
+        };
+
+    public:
+        struct FilterMatch {
+            std::string name;
+            std::vector<TestCase const*> tests;
+        };
+        using Matches = std::vector<FilterMatch>;
+        using vectorStrings = std::vector<std::string>;
+
+        bool hasFilters() const;
+        bool matches( TestCaseInfo const& testCase ) const;
+        Matches matchesByFilter( std::vector<TestCase> const& testCases, IConfig const& config ) const;
+        const vectorStrings & getInvalidArgs() const;
+
+    private:
+        std::vector<Filter> m_filters;
+        std::vector<std::string> m_invalidArgs;
+        friend class TestSpecParser;
+    };
+}
