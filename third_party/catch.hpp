@@ -1390,3 +1390,38 @@ namespace Catch {
 #include <iosfwd>
 #include <cstddef>
 #include <ostream>
+namespace Catch {
+
+    std::ostream& cout();
+    std::ostream& cerr();
+    std::ostream& clog();
+
+    class StringRef;
+
+    struct IStream {
+        virtual ~IStream();
+        virtual std::ostream& stream() const = 0;
+    };
+
+    auto makeStream( StringRef const &filename ) -> IStream const*;
+
+    class ReusableStringStream : NonCopyable {
+        std::size_t m_index;
+        std::ostream* m_oss;
+    public:
+        ReusableStringStream();
+        ~ReusableStringStream();
+
+        auto str() const -> std::string;
+
+        template<typename T>
+        auto operator << ( T const& value ) -> ReusableStringStream& {
+            *m_oss << value;
+            return *this;
+        }
+        auto get() -> std::ostream& { return *m_oss; }
+    };
+}
+
+// end catch_stream.h
+// start catch_interfaces_enum_values_registry.h
