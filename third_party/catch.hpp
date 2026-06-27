@@ -1971,3 +1971,48 @@ namespace Catch {
     template <typename T>
     struct is_range : detail::is_range_impl<T> {
     };
+
+#if defined(_MANAGED) // Managed types are never ranges
+    template <typename T>
+    struct is_range<T^> {
+        static const bool value = false;
+    };
+#endif
+
+    template<typename Range>
+    std::string rangeToString( Range const& range ) {
+        return ::Catch::Detail::rangeToString( begin( range ), end( range ) );
+    }
+
+    // Handle vector<bool> specially
+    template<typename Allocator>
+    std::string rangeToString( std::vector<bool, Allocator> const& v ) {
+        ReusableStringStream rss;
+        rss << "{ ";
+        bool first = true;
+        for( bool b : v ) {
+            if( first )
+                first = false;
+            else
+                rss << ", ";
+            rss << ::Catch::Detail::stringify( b );
+        }
+        rss << " }";
+        return rss.str();
+    }
+
+    template<typename R>
+    struct StringMaker<R, typename std::enable_if<is_range<R>::value && !::Catch::Detail::IsStreamInsertable<R>::value>::type> {
+        static std::string convert( R const& range ) {
+            return rangeToString( range );
+        }
+    };
+
+    template <typename T, int SZ>
+    struct StringMaker<T[SZ]> {
+        static std::string convert(T const(&arr)[SZ]) {
+            return rangeToString(arr);
+        }
+    };
+
+} // namespace Catch
