@@ -2387,3 +2387,52 @@ namespace Catch {
     };
 
 } // end namespace Catch
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+// end catch_decomposer.h
+// start catch_interfaces_capture.h
+
+#include <string>
+#include <chrono>
+
+namespace Catch {
+
+    class AssertionResult;
+    struct AssertionInfo;
+    struct SectionInfo;
+    struct SectionEndInfo;
+    struct MessageInfo;
+    struct MessageBuilder;
+    struct Counts;
+    struct AssertionReaction;
+    struct SourceLineInfo;
+
+    struct ITransientExpression;
+    struct IGeneratorTracker;
+
+#if defined(CATCH_CONFIG_ENABLE_BENCHMARKING)
+    struct BenchmarkInfo;
+    template <typename Duration = std::chrono::duration<double, std::nano>>
+    struct BenchmarkStats;
+#endif // CATCH_CONFIG_ENABLE_BENCHMARKING
+
+    struct IResultCapture {
+
+        virtual ~IResultCapture();
+
+        virtual bool sectionStarted(    SectionInfo const& sectionInfo,
+                                        Counts& assertions ) = 0;
+        virtual void sectionEnded( SectionEndInfo const& endInfo ) = 0;
+        virtual void sectionEndedEarly( SectionEndInfo const& endInfo ) = 0;
+
+        virtual auto acquireGeneratorTracker( StringRef generatorName, SourceLineInfo const& lineInfo ) -> IGeneratorTracker& = 0;
+
+#if defined(CATCH_CONFIG_ENABLE_BENCHMARKING)
+        virtual void benchmarkPreparing( std::string const& name ) = 0;
+        virtual void benchmarkStarting( BenchmarkInfo const& info ) = 0;
+        virtual void benchmarkEnded( BenchmarkStats<> const& stats ) = 0;
+        virtual void benchmarkFailed( std::string const& error ) = 0;
+#endif // CATCH_CONFIG_ENABLE_BENCHMARKING
