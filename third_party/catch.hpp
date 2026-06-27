@@ -3446,3 +3446,33 @@ namespace Matchers {
 
 #include <functional>
 #include <string>
+
+namespace Catch {
+namespace Matchers {
+namespace Generic {
+
+namespace Detail {
+    std::string finalizeDescription(const std::string& desc);
+}
+
+template <typename T>
+class PredicateMatcher : public MatcherBase<T> {
+    std::function<bool(T const&)> m_predicate;
+    std::string m_description;
+public:
+
+    PredicateMatcher(std::function<bool(T const&)> const& elem, std::string const& descr)
+        :m_predicate(std::move(elem)),
+        m_description(Detail::finalizeDescription(descr))
+    {}
+
+    bool match( T const& item ) const override {
+        return m_predicate(item);
+    }
+
+    std::string describe() const override {
+        return m_description;
+    }
+};
+
+} // namespace Generic
