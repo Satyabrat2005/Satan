@@ -1,1 +1,101 @@
+// =====================================================
+// OOP Test — Phase 2 SatanLang
+// =====================================================
 
+// --- Test 1: Basic class + constructor + field access ---
+class Animal {
+    func init(name, sound) {
+        this.name = name;
+        this.sound = sound;
+    }
+    func speak() {
+        print this.name + " says " + this.sound + "!";
+    }
+    func describe() {
+        return "I am " + this.name;
+    }
+}
+
+let cat = new Animal("Whiskers", "Meow");
+let dog = new Animal("Rex", "Woof");
+cat.speak();
+dog.speak();
+print cat.describe();
+print dog.name;
+
+// --- Test 2: Counter class with mutable state ---
+class Counter {
+    func init(start) {
+        this.count = start;
+    }
+    func increment() {
+        this.count = this.count + 1;
+    }
+    func decrement() {
+        this.count = this.count - 1;
+    }
+    func reset() {
+        this.count = 0;
+    }
+    func value() {
+        return this.count;
+    }
+}
+
+let c = new Counter(10);
+c.increment();
+c.increment();
+c.increment();
+c.decrement();
+print "Counter value: " + c.value();   // Expected: 12
+
+// --- Test 3: BankAccount with balance logic ---
+class BankAccount {
+    func init(owner, balance) {
+        this.owner   = owner;
+        this.balance = balance;
+    }
+    func deposit(amount) {
+        this.balance = this.balance + amount;
+        print this.owner + " deposited " + amount + ". Balance: " + this.balance;
+    }
+    func withdraw(amount) {
+        if (this.balance >= amount) {
+            this.balance = this.balance - amount;
+            print this.owner + " withdrew " + amount + ". Balance: " + this.balance;
+        } else {
+            print "Insufficient funds for " + this.owner;
+        }
+    }
+    func getBalance() {
+        return this.balance;
+    }
+}
+
+let acc = new BankAccount("Alice", 1000);
+acc.deposit(500);
+acc.withdraw(200);
+acc.withdraw(2000);
+print "Final balance: " + acc.getBalance();
+
+// --- Test 4: Class with no constructor (fields set on first call) ---
+class Greeter {
+    func greet(name) {
+        print "Hello, " + name + "!";
+    }
+}
+
+let g = new Greeter();
+g.greet("SatanLang");
+g.greet("World");
+
+// --- Test 5: Two independent instances don't share state ---
+let a = new Counter(0);
+let b = new Counter(100);
+a.increment();
+a.increment();
+b.decrement();
+print "a = " + a.value();    // 2
+print "b = " + b.value();    // 99
+
+print "All OOP tests passed!";
