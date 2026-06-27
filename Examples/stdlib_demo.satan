@@ -1,0 +1,178 @@
+// =============================================================
+// SatanLang Standard Library -- Integration Demo
+// Phase 3: Native stdlib showcase
+// Run: satan examples/stdlib_demo.satan
+// =============================================================
+
+import "lib/math.satan";
+import "lib/collections.satan";
+import "lib/testing.satan";
+
+print "==============================================";
+print "  SatanLang v3.0 -- Standard Library Demo";
+print "==============================================";
+
+// =============================================================
+// SECTION 1: Math Library
+// =============================================================
+
+describe("lib/math.satan -- Statistical Functions");
+
+let scores = [88, 72, 95, 61, 84, 77, 90, 55, 68, 100];
+
+let avg    = mean(scores);
+let med    = median(scores);
+let spread = std_dev(scores);
+let v      = variance(scores);
+
+print "";
+print "  Dataset : " + scores.join(", ");
+print "  Mean    : " + str(avg);
+print "  Median  : " + str(med);
+print "  Std Dev : " + str(spread);
+print "  Variance: " + str(v);
+print "  Sum     : " + str(sum(scores));
+print "  Max     : " + str(max_val(scores));
+print "  Min     : " + str(min_val(scores));
+
+expectNamed(avg, "mean of scores").toBeGreaterThan(70);
+expectNamed(med, "median of scores").toBeGreaterThan(70);
+expectNamed(spread, "std_dev > 0").toBeGreaterThan(0);
+expectNamed(max_val(scores), "max is 100").toBe(100);
+expectNamed(min_val(scores), "min is 55").toBe(55);
+
+describe("lib/math.satan -- Utility Functions");
+
+expectNamed(clamp(150, 0, 100), "clamp(150, 0, 100)").toBe(100);
+expectNamed(clamp(-5, 0, 100),  "clamp(-5, 0, 100)").toBe(0);
+expectNamed(clamp(50, 0, 100),  "clamp(50, 0, 100)").toBe(50);
+
+expectNamed(lerp(0, 100, 0),   "lerp(0,100,0)").toBe(0);
+expectNamed(lerp(0, 100, 1),   "lerp(0,100,1)").toBe(100);
+expectNamed(lerp(0, 100, 0.5), "lerp(0,100,0.5)").toBe(50);
+
+let normed = normalize([0, 25, 50, 75, 100]);
+print "";
+print "  normalize([0,25,50,75,100]) : " + normed.join(", ");
+expectNamed(normed[0], "normalized first = 0").toBe(0);
+expectNamed(normed[4], "normalized last = 1").toBe(1);
+
+// =============================================================
+// SECTION 2: Collections Library
+// =============================================================
+
+describe("lib/collections.satan -- Stack (LIFO)");
+
+let s = new Stack();
+expectNamed(s.isEmpty(), "new Stack is empty").toBeTruthy();
+
+s.push(10);
+s.push(20);
+s.push(30);
+s.display();
+
+expectNamed(s.size(),    "Stack size after 3 pushes").toBe(3);
+expectNamed(s.peek(),    "Stack peek top").toBe(30);
+expectNamed(s.pop(),     "Stack pop #1").toBe(30);
+expectNamed(s.pop(),     "Stack pop #2").toBe(20);
+expectNamed(s.size(),    "Stack size after 2 pops").toBe(1);
+expectNamed(s.isEmpty(), "Stack not empty yet").toBeFalsy();
+
+s.pop();
+expectNamed(s.isEmpty(), "Stack empty after draining").toBeTruthy();
+
+describe("lib/collections.satan -- Queue (FIFO)");
+
+let q = new Queue();
+expectNamed(q.isEmpty(), "new Queue is empty").toBeTruthy();
+
+q.enqueue("alice");
+q.enqueue("bob");
+q.enqueue("charlie");
+q.display();
+
+expectNamed(q.size(),    "Queue size after 3 enqueues").toBe(3);
+expectNamed(q.front(),   "Queue front is alice").toBe("alice");
+expectNamed(q.back(),    "Queue back is charlie").toBe("charlie");
+expectNamed(q.dequeue(), "Queue dequeue #1 = alice").toBe("alice");
+expectNamed(q.dequeue(), "Queue dequeue #2 = bob").toBe("bob");
+expectNamed(q.front(),   "Queue front after 2 dequeues").toBe("charlie");
+expectNamed(q.size(),    "Queue size after 2 dequeues").toBe(1);
+
+describe("lib/collections.satan -- MinStack (O(1) minimum)");
+
+let ms = new MinStack();
+ms.push(5);
+ms.push(3);
+ms.push(8);
+ms.push(1);
+ms.push(4);
+
+expectNamed(ms.getMin(), "MinStack min with [5,3,8,1,4]").toBe(1);
+ms.pop();
+ms.pop();
+expectNamed(ms.getMin(), "MinStack min after popping 4 and 1").toBe(3);
+expectNamed(ms.size(),   "MinStack size after 2 pops").toBe(3);
+
+// =============================================================
+// SECTION 3: Testing Library (self-verification)
+// =============================================================
+
+describe("lib/testing.satan -- Expectation API");
+
+expectNamed(1 + 1,          "basic arithmetic").toBe(2);
+expectNamed("hello".upper(), "string upper").toBe("HELLO");
+expectNamed(true,            "boolean true").toBeTruthy();
+expectNamed(false,           "boolean false").toBeFalsy();
+expectNamed(99,              "greater than 50").toBeGreaterThan(50);
+expectNamed(3,               "less than 10").toBeLessThan(10);
+
+let nums = [1, 2, 3, 4, 5];
+expectNamed(nums, "array length 5").toHaveLength(5);
+expectNamed(nums, "array contains 3").toInclude(3);
+
+// =============================================================
+// SECTION 4: OOP + Math combined (Real-World Pattern)
+// =============================================================
+
+describe("OOP + Math -- DataStats class");
+
+class DataStats {
+    func init(label, data) {
+        this.label = label;
+        this.data  = data;
+    }
+
+    func report() {
+        print "";
+        print "  === " + this.label + " ===";
+        print "  n       : " + str(this.data.length);
+        print "  mean    : " + str(mean(this.data));
+        print "  median  : " + str(median(this.data));
+        print "  std_dev : " + str(std_dev(this.data));
+        print "  min     : " + str(min_val(this.data));
+        print "  max     : " + str(max_val(this.data));
+    }
+
+    func isNormal() {
+        let m    = mean(this.data);
+        let med2 = median(this.data);
+        let diff = m - med2;
+        if (diff < 0) { diff = diff * -1; }
+        return diff < std_dev(this.data) * 0.5;
+    }
+}
+
+let exam    = new DataStats("Exam Scores",    [55, 60, 65, 70, 72, 75, 78, 82, 88, 95]);
+let latency = new DataStats("API Latency ms", [120, 135, 98, 142, 115, 200, 105, 130, 118, 125]);
+
+exam.report();
+latency.report();
+
+expectNamed(exam.isNormal(), "exam scores roughly normal").toBeTruthy();
+
+// =============================================================
+// Final Summary
+// =============================================================
+
+summary();
