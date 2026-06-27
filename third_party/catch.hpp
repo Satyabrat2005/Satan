@@ -3190,3 +3190,48 @@ namespace Catch {
 // end catch_string_manip.h
 #ifndef CATCH_CONFIG_DISABLE_MATCHERS
 // start catch_capture_matchers.h
+
+// start catch_matchers.h
+
+#include <string>
+#include <vector>
+
+namespace Catch {
+namespace Matchers {
+    namespace Impl {
+
+        template<typename ArgT> struct MatchAllOf;
+        template<typename ArgT> struct MatchAnyOf;
+        template<typename ArgT> struct MatchNotOf;
+
+        class MatcherUntypedBase {
+        public:
+            MatcherUntypedBase() = default;
+            MatcherUntypedBase ( MatcherUntypedBase const& ) = default;
+            MatcherUntypedBase& operator = ( MatcherUntypedBase const& ) = delete;
+            std::string toString() const;
+
+        protected:
+            virtual ~MatcherUntypedBase();
+            virtual std::string describe() const = 0;
+            mutable std::string m_cachedToString;
+        };
+
+#ifdef __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
+        template<typename ObjectT>
+        struct MatcherMethod {
+            virtual bool match( ObjectT const& arg ) const = 0;
+        };
+
+#if defined(__OBJC__)
+        // Hack to fix Catch GH issue #1661. Could use id for generic Object support.
+        // use of const for Object pointers is very uncommon and under ARC it causes some kind of signature mismatch that breaks compilation
+        template<>
+        struct MatcherMethod<NSString*> {
+            virtual bool match( NSString* arg ) const = 0;
+        };
+#endif
