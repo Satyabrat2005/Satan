@@ -1860,3 +1860,61 @@ namespace Catch {
     };
 }
 #endif // CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER
+
+#if defined(CATCH_CONFIG_ENABLE_OPTIONAL_STRINGMAKER) && defined(CATCH_CONFIG_CPP17_OPTIONAL)
+#include <optional>
+namespace Catch {
+    template<typename T>
+    struct StringMaker<std::optional<T> > {
+        static std::string convert(const std::optional<T>& optional) {
+            ReusableStringStream rss;
+            if (optional.has_value()) {
+                rss << ::Catch::Detail::stringify(*optional);
+            } else {
+                rss << "{ }";
+            }
+            return rss.str();
+        }
+    };
+}
+#endif // CATCH_CONFIG_ENABLE_OPTIONAL_STRINGMAKER
+
+// Separate std::tuple specialization
+#if defined(CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER)
+#include <tuple>
+namespace Catch {
+    namespace Detail {
+        template<
+            typename Tuple,
+            std::size_t N = 0,
+            bool = (N < std::tuple_size<Tuple>::value)
+            >
+            struct TupleElementPrinter {
+            static void print(const Tuple& tuple, std::ostream& os) {
+                os << (N ? ", " : " ")
+                    << ::Catch::Detail::stringify(std::get<N>(tuple));
+                TupleElementPrinter<Tuple, N + 1>::print(tuple, os);
+            }
+        };
+
+        template<
+            typename Tuple,
+            std::size_t N
+        >
+            struct TupleElementPrinter<Tuple, N, false> {
+            static void print(const Tuple&, std::ostream&) {}
+        };
+
+    }
+
+    template<typename ...Types>
+    struct StringMaker<std::tuple<Types...>> {
+        static std::string convert(const std::tuple<Types...>& tuple) {
+            ReusableStringStream rss;
+            rss << '{';
+            Detail::TupleElementPrinter<std::tuple<Types...>>::print(tuple, rss.get());
+            rss << " }";
+            return rss.str();
+        }
+    };
+}
