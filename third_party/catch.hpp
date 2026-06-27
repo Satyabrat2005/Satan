@@ -1050,3 +1050,39 @@ struct AutoReg : NonCopyable {
              void TestName::test()
          #define INTERNAL_CATCH_TEST_CASE_METHOD( ClassName, ... ) \
              INTERNAL_CATCH_TEST_CASE_METHOD2( INTERNAL_CATCH_UNIQUE_NAME( C_A_T_C_H_T_E_S_T_ ), ClassName, __VA_ARGS__ )
+          ///////////////////////////////////////////////////////////////////////////////
+    #define INTERNAL_CATCH_REGISTER_TESTCASE( Function, ... ) \
+        CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+        CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+        Catch::AutoReg INTERNAL_CATCH_UNIQUE_NAME( autoRegistrar )( Catch::makeTestInvoker( Function ), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), Catch::NameAndTags{ __VA_ARGS__ } ); /* NOLINT */ \
+        CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
+
+    ///////////////////////////////////////////////////////////////////////////////
+    #define INTERNAL_CATCH_TEMPLATE_TEST_CASE_2(TestName, TestFunc, Name, Tags, Signature, ... )\
+        CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+        CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+        CATCH_INTERNAL_SUPPRESS_ZERO_VARIADIC_WARNINGS \
+        CATCH_INTERNAL_SUPPRESS_UNUSED_TEMPLATE_WARNINGS \
+        INTERNAL_CATCH_DECLARE_SIG_TEST(TestFunc, INTERNAL_CATCH_REMOVE_PARENS(Signature));\
+        namespace {\
+        namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName){\
+            INTERNAL_CATCH_TYPE_GEN\
+            INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))\
+            INTERNAL_CATCH_NTTP_REG_GEN(TestFunc,INTERNAL_CATCH_REMOVE_PARENS(Signature))\
+            template<typename...Types> \
+            struct TestName{\
+                TestName(){\
+                    int index = 0;                                    \
+                    constexpr char const* tmpl_types[] = {CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, __VA_ARGS__)};\
+                    using expander = int[];\
+                    (void)expander{(reg_test(Types{}, Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index]), Tags } ), index++)... };/* NOLINT */ \
+                }\
+            };\
+            static int INTERNAL_CATCH_UNIQUE_NAME( globalRegistrar ) = [](){\
+            TestName<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(__VA_ARGS__)>();\
+            return 0;\
+        }();\
+        }\
+        }\
+        CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION \
+        INTERNAL_CATCH_DEFINE_SIG_TEST(TestFunc,INTERNAL_CATCH_REMOVE_PARENS(Signature))
