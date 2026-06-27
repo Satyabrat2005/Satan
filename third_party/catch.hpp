@@ -5379,3 +5379,63 @@ namespace Catch {
 // Outlier information
 
 namespace Catch {
+    namespace Benchmark {
+        struct OutlierClassification {
+            int samples_seen = 0;
+            int low_severe = 0;     // more than 3 times IQR below Q1
+            int low_mild = 0;       // 1.5 to 3 times IQR below Q1
+            int high_mild = 0;      // 1.5 to 3 times IQR above Q3
+            int high_severe = 0;    // more than 3 times IQR above Q3
+
+            int total() const {
+                return low_severe + low_mild + high_mild + high_severe;
+            }
+        };
+    } // namespace Benchmark
+} // namespace Catch
+
+// end catch_outlier_classification.hpp
+
+#include <iterator>
+#endif // CATCH_CONFIG_ENABLE_BENCHMARKING
+
+#include <string>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <memory>
+#include <algorithm>
+
+namespace Catch {
+
+    struct ReporterConfig {
+        explicit ReporterConfig( IConfigPtr const& _fullConfig );
+
+        ReporterConfig( IConfigPtr const& _fullConfig, std::ostream& _stream );
+
+        std::ostream& stream() const;
+        IConfigPtr fullConfig() const;
+
+    private:
+        std::ostream* m_stream;
+        IConfigPtr m_fullConfig;
+    };
+
+    struct ReporterPreferences {
+        bool shouldRedirectStdOut = false;
+        bool shouldReportAllAssertions = false;
+    };
+
+    template<typename T>
+    struct LazyStat : Option<T> {
+        LazyStat& operator=( T const& _value ) {
+            Option<T>::operator=( _value );
+            used = false;
+            return *this;
+        }
+        void reset() {
+            Option<T>::reset();
+            used = false;
+        }
+        bool used = false;
+    };
