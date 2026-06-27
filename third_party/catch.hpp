@@ -2061,3 +2061,53 @@ template <>
 struct ratio_string<std::milli> {
     static std::string symbol();
 };
+
+    ////////////
+    // std::chrono::duration specializations
+    template<typename Value, typename Ratio>
+    struct StringMaker<std::chrono::duration<Value, Ratio>> {
+        static std::string convert(std::chrono::duration<Value, Ratio> const& duration) {
+            ReusableStringStream rss;
+            rss << duration.count() << ' ' << ratio_string<Ratio>::symbol() << 's';
+            return rss.str();
+        }
+    };
+    template<typename Value>
+    struct StringMaker<std::chrono::duration<Value, std::ratio<1>>> {
+        static std::string convert(std::chrono::duration<Value, std::ratio<1>> const& duration) {
+            ReusableStringStream rss;
+            rss << duration.count() << " s";
+            return rss.str();
+        }
+    };
+    template<typename Value>
+    struct StringMaker<std::chrono::duration<Value, std::ratio<60>>> {
+        static std::string convert(std::chrono::duration<Value, std::ratio<60>> const& duration) {
+            ReusableStringStream rss;
+            rss << duration.count() << " m";
+            return rss.str();
+        }
+    };
+    template<typename Value>
+    struct StringMaker<std::chrono::duration<Value, std::ratio<3600>>> {
+        static std::string convert(std::chrono::duration<Value, std::ratio<3600>> const& duration) {
+            ReusableStringStream rss;
+            rss << duration.count() << " h";
+            return rss.str();
+        }
+    };
+
+    ////////////
+    // std::chrono::time_point specialization
+    // Generic time_point cannot be specialized, only std::chrono::time_point<system_clock>
+    template<typename Clock, typename Duration>
+    struct StringMaker<std::chrono::time_point<Clock, Duration>> {
+        static std::string convert(std::chrono::time_point<Clock, Duration> const& time_point) {
+            return ::Catch::Detail::stringify(time_point.time_since_epoch()) + " since epoch";
+        }
+    };
+    // std::chrono::time_point<system_clock> specialization
+    template<typename Duration>
+    struct StringMaker<std::chrono::time_point<std::chrono::system_clock, Duration>> {
+        static std::string convert(std::chrono::time_point<std::chrono::system_clock, Duration> const& time_point) {
+            auto converted = std::chrono::system_clock::to_time_t(time_point);
