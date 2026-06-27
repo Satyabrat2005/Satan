@@ -5150,3 +5150,121 @@ namespace Catch {
         TestSpec testSpec();
 
     private:
+        bool visitChar( char c );
+        void startNewMode( Mode mode );
+        bool processNoneChar( char c );
+        void processNameChar( char c );
+        bool processOtherChar( char c );
+        void endMode();
+        void escape();
+        bool isControlChar( char c ) const;
+        void saveLastMode();
+        void revertBackToLastMode();
+        void addFilter();
+        bool separate();
+
+        // Handles common preprocessing of the pattern for name/tag patterns
+        std::string preprocessPattern();
+        // Adds the current pattern as a test name
+        void addNamePattern();
+        // Adds the current pattern as a tag
+        void addTagPattern();
+
+        inline void addCharToPattern(char c) {
+            m_substring += c;
+            m_patternName += c;
+            m_realPatternPos++;
+        }
+
+    };
+    TestSpec parseTestSpec( std::string const& arg );
+
+} // namespace Catch
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
+// end catch_test_spec_parser.h
+// Libstdc++ doesn't like incomplete classes for unique_ptr
+
+#include <memory>
+#include <vector>
+#include <string>
+
+#ifndef CATCH_CONFIG_CONSOLE_WIDTH
+#define CATCH_CONFIG_CONSOLE_WIDTH 80
+#endif
+
+namespace Catch {
+
+    struct IStream;
+
+    struct ConfigData {
+        bool listTests = false;
+        bool listTags = false;
+        bool listReporters = false;
+        bool listTestNamesOnly = false;
+
+        bool showSuccessfulTests = false;
+        bool shouldDebugBreak = false;
+        bool noThrow = false;
+        bool showHelp = false;
+        bool showInvisibles = false;
+        bool filenamesAsTags = false;
+        bool libIdentify = false;
+
+        int abortAfter = -1;
+        unsigned int rngSeed = 0;
+
+        bool benchmarkNoAnalysis = false;
+        unsigned int benchmarkSamples = 100;
+        double benchmarkConfidenceInterval = 0.95;
+        unsigned int benchmarkResamples = 100000;
+        std::chrono::milliseconds::rep benchmarkWarmupTime = 100;
+
+        Verbosity verbosity = Verbosity::Normal;
+        WarnAbout::What warnings = WarnAbout::Nothing;
+        ShowDurations::OrNot showDurations = ShowDurations::DefaultForReporter;
+        double minDuration = -1;
+        RunTests::InWhatOrder runOrder = RunTests::InDeclarationOrder;
+        UseColour::YesOrNo useColour = UseColour::Auto;
+        WaitForKeypress::When waitForKeypress = WaitForKeypress::Never;
+
+        std::string outputFilename;
+        std::string name;
+        std::string processName;
+#ifndef CATCH_CONFIG_DEFAULT_REPORTER
+#define CATCH_CONFIG_DEFAULT_REPORTER "console"
+#endif
+        std::string reporterName = CATCH_CONFIG_DEFAULT_REPORTER;
+#undef CATCH_CONFIG_DEFAULT_REPORTER
+
+        std::vector<std::string> testsOrTags;
+        std::vector<std::string> sectionsToRun;
+    };
+
+    class Config : public IConfig {
+    public:
+
+        Config() = default;
+        Config( ConfigData const& data );
+        virtual ~Config() = default;
+
+        std::string const& getFilename() const;
+
+        bool listTests() const;
+        bool listTestNamesOnly() const;
+        bool listTags() const;
+        bool listReporters() const;
+
+        std::string getProcessName() const;
+        std::string const& getReporterName() const;
+
+        std::vector<std::string> const& getTestsOrTags() const override;
+        std::vector<std::string> const& getSectionsToRun() const override;
+
+        TestSpec const& testSpec() const override;
+        bool hasTestFilters() const override;
+
+        bool showHelp() const;
