@@ -50,3 +50,36 @@
 #  define CATCH_IMPL
 #  define CATCH_CONFIG_ALL_PARTS
 #endif
+
+// In the impl file, we want to have access to all parts of the headers
+// Can also be used to sanely support PCHs
+#if defined(CATCH_CONFIG_ALL_PARTS)
+#  define CATCH_CONFIG_EXTERNAL_INTERFACES
+#  if defined(CATCH_CONFIG_DISABLE_MATCHERS)
+#    undef CATCH_CONFIG_DISABLE_MATCHERS
+#  endif
+#  if !defined(CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER)
+#    define CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER
+#  endif
+#endif
+
+#if !defined(CATCH_CONFIG_IMPL_ONLY)
+// start catch_platform.h
+
+// See e.g.:
+// https://opensource.apple.com/source/CarbonHeaders/CarbonHeaders-18.1/TargetConditionals.h.auto.html
+#ifdef __APPLE__
+#  include <TargetConditionals.h>
+#  if (defined(TARGET_OS_OSX) && TARGET_OS_OSX == 1) || \
+      (defined(TARGET_OS_MAC) && TARGET_OS_MAC == 1)
+#    define CATCH_PLATFORM_MAC
+#  elif (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE == 1)
+#    define CATCH_PLATFORM_IPHONE
+#  endif
+
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+#  define CATCH_PLATFORM_LINUX
+
+#elif defined(WIN32) || defined(__WIN32__) || defined(_WIN32) || defined(_MSC_VER) || defined(__MINGW32__)
+#  define CATCH_PLATFORM_WINDOWS
+#endif
