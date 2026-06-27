@@ -1425,3 +1425,37 @@ namespace Catch {
 
 // end catch_stream.h
 // start catch_interfaces_enum_values_registry.h
+#include <vector>
+
+namespace Catch {
+
+    namespace Detail {
+        struct EnumInfo {
+            StringRef m_name;
+            std::vector<std::pair<int, StringRef>> m_values;
+
+            ~EnumInfo();
+
+            StringRef lookup( int value ) const;
+        };
+    } // namespace Detail
+
+    struct IMutableEnumValuesRegistry {
+        virtual ~IMutableEnumValuesRegistry();
+
+        virtual Detail::EnumInfo const& registerEnum( StringRef enumName, StringRef allEnums, std::vector<int> const& values ) = 0;
+
+        template<typename E>
+        Detail::EnumInfo const& registerEnum( StringRef enumName, StringRef allEnums, std::initializer_list<E> values ) {
+            static_assert(sizeof(int) >= sizeof(E), "Cannot serialize enum to int");
+            std::vector<int> intValues;
+            intValues.reserve( values.size() );
+            for( auto enumValue : values )
+                intValues.push_back( static_cast<int>( enumValue ) );
+            return registerEnum( enumName, allEnums, intValues );
+        }
+    };
+
+} // Catch
+
+// end catch_interfaces_enum_values_registry.h
