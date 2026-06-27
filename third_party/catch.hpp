@@ -3980,3 +3980,66 @@ namespace Generators {
             return m_current < m_generators.size();
         }
     };
+
+    template<typename... Ts>
+    GeneratorWrapper<std::tuple<Ts...>> table( std::initializer_list<std::tuple<typename std::decay<Ts>::type...>> tuples ) {
+        return values<std::tuple<Ts...>>( tuples );
+    }
+
+    // Tag type to signal that a generator sequence should convert arguments to a specific type
+    template <typename T>
+    struct as {};
+
+    template<typename T, typename... Gs>
+    auto makeGenerators( GeneratorWrapper<T>&& generator, Gs &&... moreGenerators ) -> Generators<T> {
+        return Generators<T>(std::move(generator), std::forward<Gs>(moreGenerators)...);
+    }
+    template<typename T>
+    auto makeGenerators( GeneratorWrapper<T>&& generator ) -> Generators<T> {
+        return Generators<T>(std::move(generator));
+    }
+    template<typename T, typename... Gs>
+    auto makeGenerators( T&& val, Gs &&... moreGenerators ) -> Generators<T> {
+        return makeGenerators( value( std::forward<T>( val ) ), std::forward<Gs>( moreGenerators )... );
+    }
+    template<typename T, typename U, typename... Gs>
+    auto makeGenerators( as<T>, U&& val, Gs &&... moreGenerators ) -> Generators<T> {
+        return makeGenerators( value( T( std::forward<U>( val ) ) ), std::forward<Gs>( moreGenerators )... );
+    }
+
+    auto acquireGeneratorTracker( StringRef generatorName, SourceLineInfo const& lineInfo ) -> IGeneratorTracker&;
+
+    template<typename L>
+    // Note: The type after -> is weird, because VS2015 cannot parse
+    //       the expression used in the typedef inside, when it is in
+    //       return type. Yeah.
+    auto generate( StringRef generatorName, SourceLineInfo const& lineInfo, L const& generatorExpression ) -> decltype(std::declval<decltype(generatorExpression())>().get()) {
+        using UnderlyingType = typename decltype(generatorExpression())::type;
+
+        IGeneratorTracker& tracker = acquireGeneratorTracker( generatorName, lineInfo );
+        if (!tracker.hasGenerator()) {
+            tracker.setGenerator(pf::make_unique<Generators<UnderlyingType>>(generatorExpression()));
+        }
+
+        auto const& generator = static_cast<IGenerator<UnderlyingType> const&>( *tracker.getGenerator() );
+        return generator.get();
+    }
+
+} // namespace Generators
+} // namespace Catch
+
+#define GENERATE( ... ) \
+    Catch::Generators::generate( INTERNAL_CATCH_STRINGIZE(INTERNAL_CATCH_UNIQUE_NAME(generator)), \
+                                 CATCH_INTERNAL_LINEINFO, \
+                                 [ ]{ using namespace Catch::Generators; return makeGenerators( __VA_ARGS__ ); } ) //NOLINT(google-build-using-namespace)
+#define GENERATE_COPY( ... ) \
+    Catch::Generators::generate( INTERNAL_CATCH_STRINGIZE(INTERNAL_CATCH_UNIQUE_NAME(generator)), \
+                                 CATCH_INTERNAL_LINEINFO, \
+                                 [=]{ using namespace Catch::Generators; return makeGenerators( __VA_ARGS__ ); } ) //NOLINT(google-build-using-namespace)
+#define GENERATE_REF( ... ) \
+    Catch::Generators::generate( INTERNAL_CATCH_STRINGIZE(INTERNAL_CATCH_UNIQUE_NAME(generator)), \
+                                 CATCH_INTERNAL_LINEINFO, \
+                                 [&]{ using namespace Catch::Generators; return makeGenerators( __VA_ARGS__ ); } ) //NOLINT(google-build-using-namespace)
+
+// end catch_generators.hpp
+// start catch_generators_generic.hpp
