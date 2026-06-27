@@ -3767,3 +3767,57 @@ namespace Catch {
 // start catch_generators.hpp
 
 // start catch_interfaces_generatortracker.h
+
+#include <memory>
+
+namespace Catch {
+
+    namespace Generators {
+        class GeneratorUntypedBase {
+        public:
+            GeneratorUntypedBase() = default;
+            virtual ~GeneratorUntypedBase();
+            // Attempts to move the generator to the next element
+             //
+             // Returns true iff the move succeeded (and a valid element
+             // can be retrieved).
+            virtual bool next() = 0;
+        };
+        using GeneratorBasePtr = std::unique_ptr<GeneratorUntypedBase>;
+
+    } // namespace Generators
+
+    struct IGeneratorTracker {
+        virtual ~IGeneratorTracker();
+        virtual auto hasGenerator() const -> bool = 0;
+        virtual auto getGenerator() const -> Generators::GeneratorBasePtr const& = 0;
+        virtual void setGenerator( Generators::GeneratorBasePtr&& generator ) = 0;
+    };
+
+} // namespace Catch
+
+// end catch_interfaces_generatortracker.h
+// start catch_enforce.h
+
+#include <exception>
+
+namespace Catch {
+#if !defined(CATCH_CONFIG_DISABLE_EXCEPTIONS)
+    template <typename Ex>
+    [[noreturn]]
+    void throw_exception(Ex const& e) {
+        throw e;
+    }
+#else // ^^ Exceptions are enabled //  Exceptions are disabled vv
+    [[noreturn]]
+    void throw_exception(std::exception const& e);
+#endif
+
+    [[noreturn]]
+    void throw_logic_error(std::string const& msg);
+    [[noreturn]]
+    void throw_domain_error(std::string const& msg);
+    [[noreturn]]
+    void throw_runtime_error(std::string const& msg);
+
+} // namespace Catch;
