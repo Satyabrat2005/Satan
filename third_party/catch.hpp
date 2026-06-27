@@ -1805,3 +1805,58 @@ namespace Catch {
     }
 
 #ifdef __OBJC__
+    template<>
+    struct StringMaker<NSString*> {
+        static std::string convert(NSString * nsstring) {
+            if (!nsstring)
+                return "nil";
+            return std::string("@") + [nsstring UTF8String];
+        }
+    };
+    template<>
+    struct StringMaker<NSObject*> {
+        static std::string convert(NSObject* nsObject) {
+            return ::Catch::Detail::stringify([nsObject description]);
+        }
+
+    };
+    namespace Detail {
+        inline std::string stringify( NSString* nsstring ) {
+            return StringMaker<NSString*>::convert( nsstring );
+        }
+
+    } // namespace Detail
+#endif // __OBJC__
+
+} // namespace Catch
+
+//////////////////////////////////////////////////////
+// Separate std-lib types stringification, so it can be selectively enabled
+// This means that we do not bring in
+
+#if defined(CATCH_CONFIG_ENABLE_ALL_STRINGMAKERS)
+#  define CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER
+#  define CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER
+#  define CATCH_CONFIG_ENABLE_VARIANT_STRINGMAKER
+#  define CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER
+#  define CATCH_CONFIG_ENABLE_OPTIONAL_STRINGMAKER
+#endif
+
+// Separate std::pair specialization
+#if defined(CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER)
+#include <utility>
+namespace Catch {
+    template<typename T1, typename T2>
+    struct StringMaker<std::pair<T1, T2> > {
+        static std::string convert(const std::pair<T1, T2>& pair) {
+            ReusableStringStream rss;
+            rss << "{ "
+                << ::Catch::Detail::stringify(pair.first)
+                << ", "
+                << ::Catch::Detail::stringify(pair.second)
+                << " }";
+            return rss.str();
+        }
+    };
+}
+#endif // CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER
