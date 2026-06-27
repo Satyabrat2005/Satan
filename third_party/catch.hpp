@@ -495,3 +495,35 @@ namespace Catch {
         :   file( _file ),
             line( _line )
         {}
+        SourceLineInfo( SourceLineInfo const& other )            = default;
+        SourceLineInfo& operator = ( SourceLineInfo const& )     = default;
+        SourceLineInfo( SourceLineInfo&& )              noexcept = default;
+        SourceLineInfo& operator = ( SourceLineInfo&& ) noexcept = default;
+
+        bool empty() const noexcept { return file[0] == '\0'; }
+        bool operator == ( SourceLineInfo const& other ) const noexcept;
+        bool operator < ( SourceLineInfo const& other ) const noexcept;
+
+        char const* file;
+        std::size_t line;
+    };
+
+    std::ostream& operator << ( std::ostream& os, SourceLineInfo const& info );
+
+    // Bring in operator<< from global namespace into Catch namespace
+    // This is necessary because the overload of operator<< above makes
+    // lookup stop at namespace Catch
+    using ::operator<<;
+
+    // Use this in variadic streaming macros to allow
+    //    >> +StreamEndStop
+    // as well as
+    //    >> stuff +StreamEndStop
+    struct StreamEndStop {
+        std::string operator+() const;
+    };
+    template<typename T>
+    T const& operator + ( T const& value, StreamEndStop ) {
+        return value;
+    }
+}
