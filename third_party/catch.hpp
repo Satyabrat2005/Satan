@@ -5493,3 +5493,60 @@ namespace Catch {
                         std::string const& _stdOut,
                         std::string const& _stdErr,
                         bool _aborting );
+
+        TestCaseStats( TestCaseStats const& )              = default;
+        TestCaseStats( TestCaseStats && )                  = default;
+        TestCaseStats& operator = ( TestCaseStats const& ) = default;
+        TestCaseStats& operator = ( TestCaseStats && )     = default;
+        virtual ~TestCaseStats();
+
+        TestCaseInfo testInfo;
+        Totals totals;
+        std::string stdOut;
+        std::string stdErr;
+        bool aborting;
+    };
+
+    struct TestGroupStats {
+        TestGroupStats( GroupInfo const& _groupInfo,
+                        Totals const& _totals,
+                        bool _aborting );
+        TestGroupStats( GroupInfo const& _groupInfo );
+
+        TestGroupStats( TestGroupStats const& )              = default;
+        TestGroupStats( TestGroupStats && )                  = default;
+        TestGroupStats& operator = ( TestGroupStats const& ) = default;
+        TestGroupStats& operator = ( TestGroupStats && )     = default;
+        virtual ~TestGroupStats();
+
+        GroupInfo groupInfo;
+        Totals totals;
+        bool aborting;
+    };
+
+    struct TestRunStats {
+        TestRunStats(   TestRunInfo const& _runInfo,
+                        Totals const& _totals,
+                        bool _aborting );
+
+        TestRunStats( TestRunStats const& )              = default;
+        TestRunStats( TestRunStats && )                  = default;
+        TestRunStats& operator = ( TestRunStats const& ) = default;
+        TestRunStats& operator = ( TestRunStats && )     = default;
+        virtual ~TestRunStats();
+
+        TestRunInfo runInfo;
+        Totals totals;
+        bool aborting;
+    };
+
+#if defined(CATCH_CONFIG_ENABLE_BENCHMARKING)
+    struct BenchmarkInfo {
+        std::string name;
+        double estimatedDuration;
+        int iterations;
+        int samples;
+        unsigned int resamples;
+        double clockResolution;
+        double clockCost;
+    };
