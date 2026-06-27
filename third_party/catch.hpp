@@ -3352,3 +3352,49 @@ using namespace Matchers;
 using Matchers::Impl::MatcherBase;
 
 } // namespace Catch
+
+// end catch_matchers.h
+// start catch_matchers_exception.hpp
+
+namespace Catch {
+namespace Matchers {
+namespace Exception {
+
+class ExceptionMessageMatcher : public MatcherBase<std::exception> {
+    std::string m_message;
+public:
+
+    ExceptionMessageMatcher(std::string const& message):
+        m_message(message)
+    {}
+
+    bool match(std::exception const& ex) const override;
+
+    std::string describe() const override;
+};
+
+} // namespace Exception
+
+Exception::ExceptionMessageMatcher Message(std::string const& message);
+
+} // namespace Matchers
+} // namespace Catch
+
+// end catch_matchers_exception.hpp
+// start catch_matchers_floating.h
+
+namespace Catch {
+namespace Matchers {
+
+    namespace Floating {
+
+        enum class FloatingPointKind : uint8_t;
+
+        struct WithinAbsMatcher : MatcherBase<double> {
+            WithinAbsMatcher(double target, double margin);
+            bool match(double const& matchee) const override;
+            std::string describe() const override;
+        private:
+            double m_target;
+            double m_margin;
+        };
