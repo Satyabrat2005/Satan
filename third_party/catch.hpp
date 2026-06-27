@@ -3694,3 +3694,29 @@ namespace Matchers {
 
 } // namespace Matchers
 } // namespace Catch
+
+// end catch_matchers_vector.h
+namespace Catch {
+
+    template<typename ArgT, typename MatcherT>
+    class MatchExpr : public ITransientExpression {
+        ArgT const& m_arg;
+        MatcherT m_matcher;
+        StringRef m_matcherString;
+    public:
+        MatchExpr( ArgT const& arg, MatcherT const& matcher, StringRef const& matcherString )
+        :   ITransientExpression{ true, matcher.match( arg ) },
+            m_arg( arg ),
+            m_matcher( matcher ),
+            m_matcherString( matcherString )
+        {}
+
+        void streamReconstructedExpression( std::ostream &os ) const override {
+            auto matcherAsString = m_matcher.toString();
+            os << Catch::Detail::stringify( m_arg ) << ' ';
+            if( matcherAsString == Detail::unprintableString )
+                os << m_matcherString;
+            else
+                os << matcherAsString;
+        }
+    };
