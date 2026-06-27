@@ -342,3 +342,41 @@ namespace Catch {
   #    endif // defined(__clang__) && (__clang_major__ < 8)
   #  endif // __has_include(<variant>) && defined(CATCH_CPP17_OR_GREATER)
 #endif // defined(__has_include)
+#if defined(CATCH_INTERNAL_CONFIG_COUNTER) && !defined(CATCH_CONFIG_NO_COUNTER) && !defined(CATCH_CONFIG_COUNTER)
+#   define CATCH_CONFIG_COUNTER
+#endif
+#if defined(CATCH_INTERNAL_CONFIG_WINDOWS_SEH) && !defined(CATCH_CONFIG_NO_WINDOWS_SEH) && !defined(CATCH_CONFIG_WINDOWS_SEH) && !defined(CATCH_INTERNAL_CONFIG_NO_WINDOWS_SEH)
+#   define CATCH_CONFIG_WINDOWS_SEH
+#endif
+// This is set by default, because we assume that unix compilers are posix-signal-compatible by default.
+#if defined(CATCH_INTERNAL_CONFIG_POSIX_SIGNALS) && !defined(CATCH_INTERNAL_CONFIG_NO_POSIX_SIGNALS) && !defined(CATCH_CONFIG_NO_POSIX_SIGNALS) && !defined(CATCH_CONFIG_POSIX_SIGNALS)
+#   define CATCH_CONFIG_POSIX_SIGNALS
+#endif
+// This is set by default, because we assume that compilers with no wchar_t support are just rare exceptions.
+#if !defined(CATCH_INTERNAL_CONFIG_NO_WCHAR) && !defined(CATCH_CONFIG_NO_WCHAR) && !defined(CATCH_CONFIG_WCHAR)
+#   define CATCH_CONFIG_WCHAR
+#endif
+
+#if !defined(CATCH_INTERNAL_CONFIG_NO_CPP11_TO_STRING) && !defined(CATCH_CONFIG_NO_CPP11_TO_STRING) && !defined(CATCH_CONFIG_CPP11_TO_STRING)
+#    define CATCH_CONFIG_CPP11_TO_STRING
+#endif
+
+#if defined(CATCH_INTERNAL_CONFIG_CPP17_OPTIONAL) && !defined(CATCH_CONFIG_NO_CPP17_OPTIONAL) && !defined(CATCH_CONFIG_CPP17_OPTIONAL)
+#  define CATCH_CONFIG_CPP17_OPTIONAL
+#endif
+
+#if defined(CATCH_INTERNAL_CONFIG_CPP17_STRING_VIEW) && !defined(CATCH_CONFIG_NO_CPP17_STRING_VIEW) && !defined(CATCH_CONFIG_CPP17_STRING_VIEW)
+#  define CATCH_CONFIG_CPP17_STRING_VIEW
+#endif
+
+#if defined(CATCH_INTERNAL_CONFIG_CPP17_VARIANT) && !defined(CATCH_CONFIG_NO_CPP17_VARIANT) && !defined(CATCH_CONFIG_CPP17_VARIANT)
+#  define CATCH_CONFIG_CPP17_VARIANT
+#endif
+
+#if defined(CATCH_INTERNAL_CONFIG_CPP17_BYTE) && !defined(CATCH_CONFIG_NO_CPP17_BYTE) && !defined(CATCH_CONFIG_CPP17_BYTE)
+#  define CATCH_CONFIG_CPP17_BYTE
+#endif
+
+#if defined(CATCH_CONFIG_EXPERIMENTAL_REDIRECT)
+#  define CATCH_INTERNAL_CONFIG_NEW_CAPTURE
+#endif
