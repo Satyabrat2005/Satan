@@ -2478,3 +2478,57 @@ namespace Catch {
 
     IResultCapture& getResultCapture();
 }
+
+// end catch_interfaces_capture.h
+namespace Catch {
+
+    struct TestFailureException{};
+    struct AssertionResultData;
+    struct IResultCapture;
+    class RunContext;
+
+    class LazyExpression {
+        friend class AssertionHandler;
+        friend struct AssertionStats;
+        friend class RunContext;
+
+        ITransientExpression const* m_transientExpression = nullptr;
+        bool m_isNegated;
+    public:
+        LazyExpression( bool isNegated );
+        LazyExpression( LazyExpression const& other );
+        LazyExpression& operator = ( LazyExpression const& ) = delete;
+
+        explicit operator bool() const;
+
+        friend auto operator << ( std::ostream& os, LazyExpression const& lazyExpr ) -> std::ostream&;
+    };
+
+    struct AssertionReaction {
+        bool shouldDebugBreak = false;
+        bool shouldThrow = false;
+    };
+
+    class AssertionHandler {
+        AssertionInfo m_assertionInfo;
+        AssertionReaction m_reaction;
+        bool m_completed = false;
+        IResultCapture& m_resultCapture;
+
+    public:
+        AssertionHandler
+            (   StringRef const& macroName,
+                SourceLineInfo const& lineInfo,
+                StringRef capturedExpression,
+                ResultDisposition::Flags resultDisposition );
+        ~AssertionHandler() {
+            if ( !m_completed ) {
+                m_resultCapture.handleIncomplete( m_assertionInfo );
+            }
+        }
+
+        template<typename T>
+        void handleExpr( ExprLhs<T> const& expr ) {
+            handleExpr( expr.makeUnaryExpr() );
+        }
+        void handleExpr( ITransientExpression const& expr );
