@@ -5323,3 +5323,59 @@ namespace Catch {
 
         std::string reconstructExpression() const;
     };
+
+    class AssertionResult {
+    public:
+        AssertionResult() = delete;
+        AssertionResult( AssertionInfo const& info, AssertionResultData const& data );
+
+        bool isOk() const;
+        bool succeeded() const;
+        ResultWas::OfType getResultType() const;
+        bool hasExpression() const;
+        bool hasMessage() const;
+        std::string getExpression() const;
+        std::string getExpressionInMacro() const;
+        bool hasExpandedExpression() const;
+        std::string getExpandedExpression() const;
+        std::string getMessage() const;
+        SourceLineInfo getSourceInfo() const;
+        StringRef getTestMacroName() const;
+
+    //protected:
+        AssertionInfo m_info;
+        AssertionResultData m_resultData;
+    };
+
+} // end namespace Catch
+
+// end catch_assertionresult.h
+#if defined(CATCH_CONFIG_ENABLE_BENCHMARKING)
+// start catch_estimate.hpp
+
+ // Statistics estimates
+
+
+namespace Catch {
+    namespace Benchmark {
+        template <typename Duration>
+        struct Estimate {
+            Duration point;
+            Duration lower_bound;
+            Duration upper_bound;
+            double confidence_interval;
+
+            template <typename Duration2>
+            operator Estimate<Duration2>() const {
+                return { point, lower_bound, upper_bound, confidence_interval };
+            }
+        };
+    } // namespace Benchmark
+} // namespace Catch
+
+// end catch_estimate.hpp
+// start catch_outlier_classification.hpp
+
+// Outlier information
+
+namespace Catch {
