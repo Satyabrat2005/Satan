@@ -5268,3 +5268,58 @@ namespace Catch {
         bool hasTestFilters() const override;
 
         bool showHelp() const;
+
+        // IConfig interface
+        bool allowThrows() const override;
+        std::ostream& stream() const override;
+        std::string name() const override;
+        bool includeSuccessfulResults() const override;
+        bool warnAboutMissingAssertions() const override;
+        bool warnAboutNoTests() const override;
+        ShowDurations::OrNot showDurations() const override;
+        double minDuration() const override;
+        RunTests::InWhatOrder runOrder() const override;
+        unsigned int rngSeed() const override;
+        UseColour::YesOrNo useColour() const override;
+        bool shouldDebugBreak() const override;
+        int abortAfter() const override;
+        bool showInvisibles() const override;
+        Verbosity verbosity() const override;
+        bool benchmarkNoAnalysis() const override;
+        int benchmarkSamples() const override;
+        double benchmarkConfidenceInterval() const override;
+        unsigned int benchmarkResamples() const override;
+        std::chrono::milliseconds benchmarkWarmupTime() const override;
+
+    private:
+
+        IStream const* openStream();
+        ConfigData m_data;
+
+        std::unique_ptr<IStream const> m_stream;
+        TestSpec m_testSpec;
+        bool m_hasTestFilters = false;
+    };
+
+} // end namespace Catch
+
+// end catch_config.hpp
+// start catch_assertionresult.h
+
+#include <string>
+
+namespace Catch {
+
+    struct AssertionResultData
+    {
+        AssertionResultData() = delete;
+
+        AssertionResultData( ResultWas::OfType _resultType, LazyExpression const& _lazyExpression );
+
+        std::string message;
+        mutable std::string reconstructedExpression;
+        LazyExpression lazyExpression;
+        ResultWas::OfType resultType;
+
+        std::string reconstructExpression() const;
+    };
