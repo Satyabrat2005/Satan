@@ -1756,3 +1756,52 @@ namespace Catch {
         static std::string convert(double value);
         static int precision;
     };
+
+    template <typename T>
+    struct StringMaker<T*> {
+        template <typename U>
+        static std::string convert(U* p) {
+            if (p) {
+                return ::Catch::Detail::rawMemoryToString(p);
+            } else {
+                return "nullptr";
+            }
+        }
+    };
+
+    template <typename R, typename C>
+    struct StringMaker<R C::*> {
+        static std::string convert(R C::* p) {
+            if (p) {
+                return ::Catch::Detail::rawMemoryToString(p);
+            } else {
+                return "nullptr";
+            }
+        }
+    };
+
+#if defined(_MANAGED)
+    template <typename T>
+    struct StringMaker<T^> {
+        static std::string convert( T^ ref ) {
+            return ::Catch::Detail::clrReferenceToString(ref);
+        }
+    };
+#endif
+
+    namespace Detail {
+        template<typename InputIterator, typename Sentinel = InputIterator>
+        std::string rangeToString(InputIterator first, Sentinel last) {
+            ReusableStringStream rss;
+            rss << "{ ";
+            if (first != last) {
+                rss << ::Catch::Detail::stringify(*first);
+                for (++first; first != last; ++first)
+                    rss << ", " << ::Catch::Detail::stringify(*first);
+            }
+            rss << " }";
+            return rss.str();
+        }
+    }
+
+#ifdef __OBJC__
