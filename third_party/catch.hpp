@@ -2936,3 +2936,61 @@ namespace Catch {
 
         virtual StartupExceptionRegistry const& getStartupExceptionRegistry() const = 0;
     };
+
+    struct IMutableRegistryHub {
+        virtual ~IMutableRegistryHub();
+        virtual void registerReporter( std::string const& name, IReporterFactoryPtr const& factory ) = 0;
+        virtual void registerListener( IReporterFactoryPtr const& factory ) = 0;
+        virtual void registerTest( TestCase const& testInfo ) = 0;
+        virtual void registerTranslator( const IExceptionTranslator* translator ) = 0;
+        virtual void registerTagAlias( std::string const& alias, std::string const& tag, SourceLineInfo const& lineInfo ) = 0;
+        virtual void registerStartupException() noexcept = 0;
+        virtual IMutableEnumValuesRegistry& getMutableEnumValuesRegistry() = 0;
+    };
+
+    IRegistryHub const& getRegistryHub();
+    IMutableRegistryHub& getMutableRegistryHub();
+    void cleanUp();
+    std::string translateActiveException();
+
+}
+
+// end catch_interfaces_registry_hub.h
+#if defined(CATCH_CONFIG_DISABLE)
+    #define INTERNAL_CATCH_TRANSLATE_EXCEPTION_NO_REG( translatorName, signature) \
+        static std::string translatorName( signature )
+#endif
+
+#include <exception>
+#include <string>
+#include <vector>
+
+namespace Catch {
+    using exceptionTranslateFunction = std::string(*)();
+
+    struct IExceptionTranslator;
+    using ExceptionTranslators = std::vector<std::unique_ptr<IExceptionTranslator const>>;
+
+    struct IExceptionTranslator {
+        virtual ~IExceptionTranslator();
+        virtual std::string translate( ExceptionTranslators::const_iterator it, ExceptionTranslators::const_iterator itEnd ) const = 0;
+    };
+
+    struct IExceptionTranslatorRegistry {
+        virtual ~IExceptionTranslatorRegistry();
+
+        virtual std::string translateActiveException() const = 0;
+    };
+
+    class ExceptionTranslatorRegistrar {
+        template<typename T>
+        class ExceptionTranslator : public IExceptionTranslator {
+        public:
+
+            ExceptionTranslator( std::string(*translateFunction)( T& ) )
+            : m_translateFunction( translateFunction )
+            {}
+
+            std::string translate( ExceptionTranslators::const_iterator it, ExceptionTranslators::const_iterator itEnd ) const override {
+#if defined(CATCH_CONFIG_DISABLE_EXCEPTIONS)
+                return "";
