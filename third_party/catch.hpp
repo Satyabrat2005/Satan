@@ -4536,3 +4536,40 @@ class RandomFloatingGenerator final : public IGenerator<Float> {
     std::uniform_real_distribution<Float> m_dist;
     Float m_current_number;
 public:
+
+    RandomFloatingGenerator(Float a, Float b):
+        m_rng(rng()),
+        m_dist(a, b) {
+        static_cast<void>(next());
+    }
+
+    Float const& get() const override {
+        return m_current_number;
+    }
+    bool next() override {
+        m_current_number = m_dist(m_rng);
+        return true;
+    }
+};
+
+template <typename Integer>
+class RandomIntegerGenerator final : public IGenerator<Integer> {
+    Catch::SimplePcg32& m_rng;
+    std::uniform_int_distribution<Integer> m_dist;
+    Integer m_current_number;
+public:
+
+    RandomIntegerGenerator(Integer a, Integer b):
+        m_rng(rng()),
+        m_dist(a, b) {
+        static_cast<void>(next());
+    }
+
+    Integer const& get() const override {
+        return m_current_number;
+    }
+    bool next() override {
+        m_current_number = m_dist(m_rng);
+        return true;
+    }
+};
