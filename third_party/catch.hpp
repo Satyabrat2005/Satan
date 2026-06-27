@@ -2994,3 +2994,57 @@ namespace Catch {
             std::string translate( ExceptionTranslators::const_iterator it, ExceptionTranslators::const_iterator itEnd ) const override {
 #if defined(CATCH_CONFIG_DISABLE_EXCEPTIONS)
                 return "";
+#else
+                try {
+                    if( it == itEnd )
+                        std::rethrow_exception(std::current_exception());
+                    else
+                        return (*it)->translate( it+1, itEnd );
+                }
+                catch( T& ex ) {
+                    return m_translateFunction( ex );
+                }
+#endif
+            }
+
+        protected:
+            std::string(*m_translateFunction)( T& );
+        };
+
+    public:
+        template<typename T>
+        ExceptionTranslatorRegistrar( std::string(*translateFunction)( T& ) ) {
+            getMutableRegistryHub().registerTranslator
+                ( new ExceptionTranslator<T>( translateFunction ) );
+        }
+    };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+#define INTERNAL_CATCH_TRANSLATE_EXCEPTION2( translatorName, signature ) \
+    static std::string translatorName( signature ); \
+    CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+    CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+    namespace{ Catch::ExceptionTranslatorRegistrar INTERNAL_CATCH_UNIQUE_NAME( catch_internal_ExceptionRegistrar )( &translatorName ); } \
+    CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION \
+    static std::string translatorName( signature )
+
+#define INTERNAL_CATCH_TRANSLATE_EXCEPTION( signature ) INTERNAL_CATCH_TRANSLATE_EXCEPTION2( INTERNAL_CATCH_UNIQUE_NAME( catch_internal_ExceptionTranslator ), signature )
+
+// end catch_interfaces_exception.h
+// start catch_approx.h
+
+#include <type_traits>
+
+namespace Catch {
+namespace Detail {
+
+    class Approx {
+    private:
+        bool equalityComparisonImpl(double other) const;
+        // Validates the new margin (margin >= 0)
+        // out-of-line to avoid including stdexcept in the header
+        void setMargin(double margin);
+        // Validates the new epsilon (0 < epsilon < 1)
+        // out-of-line to avoid including stdexcept in the header
+        void setEpsilon(double epsilon);
