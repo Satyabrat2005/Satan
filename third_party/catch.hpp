@@ -2745,3 +2745,45 @@ namespace Catch {
         catchAssertionHandler.handleMessage( messageType, ( Catch::MessageStream() << __VA_ARGS__ + ::Catch::StreamEndStop() ).m_stream.str() ); \
         INTERNAL_CATCH_REACT( catchAssertionHandler ) \
     } while( false )
+
+///////////////////////////////////////////////////////////////////////////////
+#define INTERNAL_CATCH_CAPTURE( varName, macroName, ... ) \
+    auto varName = Catch::Capturer( macroName, CATCH_INTERNAL_LINEINFO, Catch::ResultWas::Info, #__VA_ARGS__ ); \
+    varName.captureValues( 0, __VA_ARGS__ )
+
+///////////////////////////////////////////////////////////////////////////////
+#define INTERNAL_CATCH_INFO( macroName, log ) \
+    Catch::ScopedMessage INTERNAL_CATCH_UNIQUE_NAME( scopedMessage )( Catch::MessageBuilder( macroName##_catch_sr, CATCH_INTERNAL_LINEINFO, Catch::ResultWas::Info ) << log );
+
+///////////////////////////////////////////////////////////////////////////////
+#define INTERNAL_CATCH_UNSCOPED_INFO( macroName, log ) \
+    Catch::getResultCapture().emplaceUnscopedMessage( Catch::MessageBuilder( macroName##_catch_sr, CATCH_INTERNAL_LINEINFO, Catch::ResultWas::Info ) << log )
+
+///////////////////////////////////////////////////////////////////////////////
+// Although this is matcher-based, it can be used with just a string
+#define INTERNAL_CATCH_THROWS_STR_MATCHES( macroName, resultDisposition, matcher, ... ) \
+    do { \
+        Catch::AssertionHandler catchAssertionHandler( macroName##_catch_sr, CATCH_INTERNAL_LINEINFO, CATCH_INTERNAL_STRINGIFY(__VA_ARGS__) ", " CATCH_INTERNAL_STRINGIFY(matcher), resultDisposition ); \
+        if( catchAssertionHandler.allowThrows() ) \
+            try { \
+                static_cast<void>(__VA_ARGS__); \
+                catchAssertionHandler.handleUnexpectedExceptionNotThrown(); \
+            } \
+            catch( ... ) { \
+                Catch::handleExceptionMatchExpr( catchAssertionHandler, matcher, #matcher##_catch_sr ); \
+            } \
+        else \
+            catchAssertionHandler.handleThrowingCallSkipped(); \
+        INTERNAL_CATCH_REACT( catchAssertionHandler ) \
+    } while( false )
+
+#endif // CATCH_CONFIG_DISABLE
+
+// end catch_capture.hpp
+// start catch_section.h
+
+// start catch_section_info.h
+
+// start catch_totals.h
+
+#include <cstddef>
