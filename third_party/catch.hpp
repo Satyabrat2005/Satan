@@ -1596,3 +1596,44 @@ namespace Catch {
 #if !defined(CATCH_CONFIG_FALLBACK_STRINGIFIER)
             return Detail::convertUnstreamable(value);
 #else
+            return CATCH_CONFIG_FALLBACK_STRINGIFIER(value);
+#endif
+        }
+    };
+
+    namespace Detail {
+
+        // This function dispatches all stringification requests inside of Catch.
+        // Should be preferably called fully qualified, like ::Catch::Detail::stringify
+        template <typename T>
+        std::string stringify(const T& e) {
+            return ::Catch::StringMaker<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::convert(e);
+        }
+
+        template<typename E>
+        std::string convertUnknownEnumToString( E e ) {
+            return ::Catch::Detail::stringify(static_cast<typename std::underlying_type<E>::type>(e));
+        }
+
+#if defined(_MANAGED)
+        template <typename T>
+        std::string stringify( T^ e ) {
+            return ::Catch::StringMaker<T^>::convert(e);
+        }
+#endif
+
+    } // namespace Detail
+
+    // Some predefined specializations
+
+    template<>
+    struct StringMaker<std::string> {
+        static std::string convert(const std::string& str);
+    };
+
+#ifdef CATCH_CONFIG_CPP17_STRING_VIEW
+    template<>
+    struct StringMaker<std::string_view> {
+        static std::string convert(std::string_view str);
+    };
+#endif
