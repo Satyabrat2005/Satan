@@ -2851,3 +2851,88 @@ namespace Catch {
 #include <cstdint>
 
 namespace Catch {
+
+    auto getCurrentNanosecondsSinceEpoch() -> uint64_t;
+    auto getEstimatedClockResolution() -> uint64_t;
+
+    class Timer {
+        uint64_t m_nanoseconds = 0;
+    public:
+        void start();
+        auto getElapsedNanoseconds() const -> uint64_t;
+        auto getElapsedMicroseconds() const -> uint64_t;
+        auto getElapsedMilliseconds() const -> unsigned int;
+        auto getElapsedSeconds() const -> double;
+    };
+
+} // namespace Catch
+
+// end catch_timer.h
+#include <string>
+
+namespace Catch {
+
+    class Section : NonCopyable {
+    public:
+        Section( SectionInfo const& info );
+        ~Section();
+
+        // This indicates whether the section should be executed or not
+        explicit operator bool() const;
+
+    private:
+        SectionInfo m_info;
+
+        std::string m_name;
+        Counts m_assertions;
+        bool m_sectionIncluded;
+        Timer m_timer;
+    };
+
+} // end namespace Catch
+
+#define INTERNAL_CATCH_SECTION( ... ) \
+    CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+    CATCH_INTERNAL_SUPPRESS_UNUSED_WARNINGS \
+    if( Catch::Section const& INTERNAL_CATCH_UNIQUE_NAME( catch_internal_Section ) = Catch::SectionInfo( CATCH_INTERNAL_LINEINFO, __VA_ARGS__ ) ) \
+    CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
+
+#define INTERNAL_CATCH_DYNAMIC_SECTION( ... ) \
+    CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+    CATCH_INTERNAL_SUPPRESS_UNUSED_WARNINGS \
+    if( Catch::Section const& INTERNAL_CATCH_UNIQUE_NAME( catch_internal_Section ) = Catch::SectionInfo( CATCH_INTERNAL_LINEINFO, (Catch::ReusableStringStream() << __VA_ARGS__).str() ) ) \
+    CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
+
+// end catch_section.h
+// start catch_interfaces_exception.h
+
+// start catch_interfaces_registry_hub.h
+
+#include <string>
+#include <memory>
+
+namespace Catch {
+
+    class TestCase;
+    struct ITestCaseRegistry;
+    struct IExceptionTranslatorRegistry;
+    struct IExceptionTranslator;
+    struct IReporterRegistry;
+    struct IReporterFactory;
+    struct ITagAliasRegistry;
+    struct IMutableEnumValuesRegistry;
+
+    class StartupExceptionRegistry;
+
+    using IReporterFactoryPtr = std::shared_ptr<IReporterFactory>;
+
+    struct IRegistryHub {
+        virtual ~IRegistryHub();
+
+        virtual IReporterRegistry const& getReporterRegistry() const = 0;
+        virtual ITestCaseRegistry const& getTestCaseRegistry() const = 0;
+        virtual ITagAliasRegistry const& getTagAliasRegistry() const = 0;
+        virtual IExceptionTranslatorRegistry const& getExceptionTranslatorRegistry() const = 0;
+
+        virtual StartupExceptionRegistry const& getStartupExceptionRegistry() const = 0;
+    };
