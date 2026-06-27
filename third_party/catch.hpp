@@ -3927,3 +3927,56 @@ namespace Generators {
             return m_generator->next();
         }
     };
+
+    template <typename T>
+    GeneratorWrapper<T> value(T&& value) {
+        return GeneratorWrapper<T>(pf::make_unique<SingleValueGenerator<T>>(std::forward<T>(value)));
+    }
+    template <typename T>
+    GeneratorWrapper<T> values(std::initializer_list<T> values) {
+        return GeneratorWrapper<T>(pf::make_unique<FixedValuesGenerator<T>>(values));
+    }
+
+    template<typename T>
+    class Generators : public IGenerator<T> {
+        std::vector<GeneratorWrapper<T>> m_generators;
+        size_t m_current = 0;
+
+        void populate(GeneratorWrapper<T>&& generator) {
+            m_generators.emplace_back(std::move(generator));
+        }
+        void populate(T&& val) {
+            m_generators.emplace_back(value(std::forward<T>(val)));
+        }
+        template<typename U>
+        void populate(U&& val) {
+            populate(T(std::forward<U>(val)));
+        }
+        template<typename U, typename... Gs>
+        void populate(U&& valueOrGenerator, Gs &&... moreGenerators) {
+            populate(std::forward<U>(valueOrGenerator));
+            populate(std::forward<Gs>(moreGenerators)...);
+        }
+
+    public:
+        template <typename... Gs>
+        Generators(Gs &&... moreGenerators) {
+            m_generators.reserve(sizeof...(Gs));
+            populate(std::forward<Gs>(moreGenerators)...);
+        }
+
+        T const& get() const override {
+            return m_generators[m_current].get();
+        }
+
+        bool next() override {
+            if (m_current >= m_generators.size()) {
+                return false;
+            }
+            const bool current_status = m_generators[m_current].next();
+            if (!current_status) {
+                ++m_current;
+            }
+            return m_current < m_generators.size();
+        }
+    };
