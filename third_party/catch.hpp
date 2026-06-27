@@ -1637,3 +1637,122 @@ namespace Catch {
         static std::string convert(std::string_view str);
     };
 #endif
+
+    template<>
+    struct StringMaker<char const *> {
+        static std::string convert(char const * str);
+    };
+    template<>
+    struct StringMaker<char *> {
+        static std::string convert(char * str);
+    };
+
+#ifdef CATCH_CONFIG_WCHAR
+    template<>
+    struct StringMaker<std::wstring> {
+        static std::string convert(const std::wstring& wstr);
+    };
+
+# ifdef CATCH_CONFIG_CPP17_STRING_VIEW
+    template<>
+    struct StringMaker<std::wstring_view> {
+        static std::string convert(std::wstring_view str);
+    };
+# endif
+
+    template<>
+    struct StringMaker<wchar_t const *> {
+        static std::string convert(wchar_t const * str);
+    };
+    template<>
+    struct StringMaker<wchar_t *> {
+        static std::string convert(wchar_t * str);
+    };
+#endif
+
+    // TBD: Should we use `strnlen` to ensure that we don't go out of the buffer,
+    //      while keeping string semantics?
+    template<int SZ>
+    struct StringMaker<char[SZ]> {
+        static std::string convert(char const* str) {
+            return ::Catch::Detail::stringify(std::string{ str });
+        }
+    };
+    template<int SZ>
+    struct StringMaker<signed char[SZ]> {
+        static std::string convert(signed char const* str) {
+            return ::Catch::Detail::stringify(std::string{ reinterpret_cast<char const *>(str) });
+        }
+    };
+    template<int SZ>
+    struct StringMaker<unsigned char[SZ]> {
+        static std::string convert(unsigned char const* str) {
+            return ::Catch::Detail::stringify(std::string{ reinterpret_cast<char const *>(str) });
+        }
+    };
+
+#if defined(CATCH_CONFIG_CPP17_BYTE)
+    template<>
+    struct StringMaker<std::byte> {
+        static std::string convert(std::byte value);
+    };
+#endif // defined(CATCH_CONFIG_CPP17_BYTE)
+    template<>
+    struct StringMaker<int> {
+        static std::string convert(int value);
+    };
+    template<>
+    struct StringMaker<long> {
+        static std::string convert(long value);
+    };
+    template<>
+    struct StringMaker<long long> {
+        static std::string convert(long long value);
+    };
+    template<>
+    struct StringMaker<unsigned int> {
+        static std::string convert(unsigned int value);
+    };
+    template<>
+    struct StringMaker<unsigned long> {
+        static std::string convert(unsigned long value);
+    };
+    template<>
+    struct StringMaker<unsigned long long> {
+        static std::string convert(unsigned long long value);
+    };
+
+    template<>
+    struct StringMaker<bool> {
+        static std::string convert(bool b);
+    };
+
+    template<>
+    struct StringMaker<char> {
+        static std::string convert(char c);
+    };
+    template<>
+    struct StringMaker<signed char> {
+        static std::string convert(signed char c);
+    };
+    template<>
+    struct StringMaker<unsigned char> {
+        static std::string convert(unsigned char c);
+    };
+
+    template<>
+    struct StringMaker<std::nullptr_t> {
+        static std::string convert(std::nullptr_t);
+    };
+
+    template<>
+    struct StringMaker<float> {
+        static std::string convert(float value);
+        static int precision;
+    };
+
+    template<>
+    struct StringMaker<double> {
+        static std::string convert(double value);
+        static int precision;
+    };
