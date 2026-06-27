@@ -1561,3 +1561,38 @@ namespace Catch {
         , std::string>::type convertUnstreamable( T const& value ) {
             return convertUnknownEnumToString( value );
         }
+#if defined(_MANAGED)
+        //! Convert a CLR string to a utf8 std::string
+        template<typename T>
+        std::string clrReferenceToString( T^ ref ) {
+            if (ref == nullptr)
+                return std::string("null");
+            auto bytes = System::Text::Encoding::UTF8->GetBytes(ref->ToString());
+            cli::pin_ptr<System::Byte> p = &bytes[0];
+            return std::string(reinterpret_cast<char const *>(p), bytes->Length);
+        }
+#endif
+
+    } // namespace Detail
+
+    // If we decide for C++14, change these to enable_if_ts
+    template <typename T, typename = void>
+    struct StringMaker {
+        template <typename Fake = T>
+        static
+        typename std::enable_if<::Catch::Detail::IsStreamInsertable<Fake>::value, std::string>::type
+            convert(const Fake& value) {
+                ReusableStringStream rss;
+                // NB: call using the function-like syntax to avoid ambiguity with
+                // user-defined templated operator<< under clang.
+                rss.operator<<(value);
+                return rss.str();
+        }
+
+        template <typename Fake = T>
+        static
+        typename std::enable_if<!::Catch::Detail::IsStreamInsertable<Fake>::value, std::string>::type
+            convert( const Fake& value ) {
+#if !defined(CATCH_CONFIG_FALLBACK_STRINGIFIER)
+            return Detail::convertUnstreamable(value);
+#else
