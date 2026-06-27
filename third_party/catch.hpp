@@ -4764,3 +4764,59 @@ namespace Catch {
 
 // end catch_test_case_info.h
 // start catch_interfaces_runner.h
+
+namespace Catch {
+
+    struct IRunner {
+        virtual ~IRunner();
+        virtual bool aborting() const = 0;
+    };
+}
+
+// end catch_interfaces_runner.h
+
+#ifdef __OBJC__
+// start catch_objc.hpp
+
+#import <objc/runtime.h>
+
+#include <string>
+
+// NB. Any general catch headers included here must be included
+// in catch.hpp first to make sure they are included by the single
+// header for non obj-usage
+
+///////////////////////////////////////////////////////////////////////////////
+// This protocol is really only here for (self) documenting purposes, since
+// all its methods are optional.
+@protocol OcFixture
+
+@optional
+
+-(void) setUp;
+-(void) tearDown;
+
+@end
+
+namespace Catch {
+
+    class OcMethod : public ITestInvoker {
+
+    public:
+        OcMethod( Class cls, SEL sel ) : m_cls( cls ), m_sel( sel ) {}
+
+        virtual void invoke() const {
+            id obj = [[m_cls alloc] init];
+
+            performOptionalSelector( obj, @selector(setUp)  );
+            performOptionalSelector( obj, m_sel );
+            performOptionalSelector( obj, @selector(tearDown)  );
+
+            arcSafeRelease( obj );
+        }
+    private:
+        virtual ~OcMethod() {}
+
+        Class m_cls;
+        SEL m_sel;
+    };
