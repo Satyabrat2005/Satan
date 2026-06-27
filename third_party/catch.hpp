@@ -231,3 +231,41 @@ namespace Catch {
 
 # endif
 #endif // __CYGWIN__
+////////////////////////////////////////////////////////////////////////////////
+// Visual C++
+#if defined(_MSC_VER)
+
+// Universal Windows platform does not support SEH
+// Or console colours (or console at all...)
+#  if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
+#    define CATCH_CONFIG_COLOUR_NONE
+#  else
+#    define CATCH_INTERNAL_CONFIG_WINDOWS_SEH
+#  endif
+
+#  if !defined(__clang__) // Handle Clang masquerading for msvc
+
+// MSVC traditional preprocessor needs some workaround for __VA_ARGS__
+// _MSVC_TRADITIONAL == 0 means new conformant preprocessor
+// _MSVC_TRADITIONAL == 1 means old traditional non-conformant preprocessor
+#    if !defined(_MSVC_TRADITIONAL) || (defined(_MSVC_TRADITIONAL) && _MSVC_TRADITIONAL)
+#      define CATCH_INTERNAL_CONFIG_TRADITIONAL_MSVC_PREPROCESSOR
+#    endif // MSVC_TRADITIONAL
+
+// Only do this if we're not using clang on Windows, which uses `diagnostic push` & `diagnostic pop`
+#    define CATCH_INTERNAL_START_WARNINGS_SUPPRESSION __pragma( warning(push) )
+#    define CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION  __pragma( warning(pop) )
+#  endif // __clang__
+
+#endif // _MSC_VER
+
+#if defined(_REENTRANT) || defined(_MSC_VER)
+// Enable async processing, as -pthread is specified or no additional linking is required
+# define CATCH_INTERNAL_CONFIG_USE_ASYNC
+#endif // _MSC_VER
+
+////////////////////////////////////////////////////////////////////////////////
+// Check if we are compiled with -fno-exceptions or equivalent
+#if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
+#  define CATCH_INTERNAL_CONFIG_EXCEPTIONS_ENABLED
+#endif
