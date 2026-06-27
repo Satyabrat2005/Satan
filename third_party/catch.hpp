@@ -2348,3 +2348,42 @@ namespace Catch {
         auto operator ^ (RhsT const& rhs) -> BinaryExpr<LhsT, RhsT const&> const {
             return { static_cast<bool>(m_lhs ^ rhs), m_lhs, "^", rhs };
         }
+
+        template<typename RhsT>
+        auto operator && ( RhsT const& ) -> BinaryExpr<LhsT, RhsT const&> const {
+            static_assert(always_false<RhsT>::value,
+            "operator&& is not supported inside assertions, "
+            "wrap the expression inside parentheses, or decompose it");
+        }
+
+        template<typename RhsT>
+        auto operator || ( RhsT const& ) -> BinaryExpr<LhsT, RhsT const&> const {
+            static_assert(always_false<RhsT>::value,
+            "operator|| is not supported inside assertions, "
+            "wrap the expression inside parentheses, or decompose it");
+        }
+
+        auto makeUnaryExpr() const -> UnaryExpr<LhsT> {
+            return UnaryExpr<LhsT>{ m_lhs };
+        }
+    };
+
+    void handleExpression( ITransientExpression const& expr );
+
+    template<typename T>
+    void handleExpression( ExprLhs<T> const& expr ) {
+        handleExpression( expr.makeUnaryExpr() );
+    }
+
+    struct Decomposer {
+        template<typename T>
+        auto operator <= ( T const& lhs ) -> ExprLhs<T const&> {
+            return ExprLhs<T const&>{ lhs };
+        }
+
+        auto operator <=( bool value ) -> ExprLhs<bool> {
+            return ExprLhs<bool>{ value };
+        }
+    };
+
+} // end namespace Catch
