@@ -4209,3 +4209,63 @@ namespace Generators {
             return success;
         }
     };
+
+    template <typename Func, typename U, typename T = FunctionReturnType<Func, U>>
+    GeneratorWrapper<T> map(Func&& function, GeneratorWrapper<U>&& generator) {
+        return GeneratorWrapper<T>(
+            pf::make_unique<MapGenerator<T, U, Func>>(std::forward<Func>(function), std::move(generator))
+        );
+    }
+
+    template <typename T, typename U, typename Func>
+    GeneratorWrapper<T> map(Func&& function, GeneratorWrapper<U>&& generator) {
+        return GeneratorWrapper<T>(
+            pf::make_unique<MapGenerator<T, U, Func>>(std::forward<Func>(function), std::move(generator))
+        );
+    }
+
+    template <typename T>
+    class ChunkGenerator final : public IGenerator<std::vector<T>> {
+        std::vector<T> m_chunk;
+        size_t m_chunk_size;
+        GeneratorWrapper<T> m_generator;
+        bool m_used_up = false;
+    public:
+        ChunkGenerator(size_t size, GeneratorWrapper<T> generator) :
+            m_chunk_size(size), m_generator(std::move(generator))
+        {
+            m_chunk.reserve(m_chunk_size);
+            if (m_chunk_size != 0) {
+                m_chunk.push_back(m_generator.get());
+                for (size_t i = 1; i < m_chunk_size; ++i) {
+                    if (!m_generator.next()) {
+                        Catch::throw_exception(GeneratorException("Not enough values to initialize the first chunk"));
+                    }
+                    m_chunk.push_back(m_generator.get());
+                }
+            }
+        }
+        std::vector<T> const& get() const override {
+            return m_chunk;
+        }
+        bool next() override {
+            m_chunk.clear();
+            for (size_t idx = 0; idx < m_chunk_size; ++idx) {
+                if (!m_generator.next()) {
+                    return false;
+                }
+                m_chunk.push_back(m_generator.get());
+            }
+            return true;
+        }
+    };
+
+    template <typename T>
+    GeneratorWrapper<std::vector<T>> chunk(size_t size, GeneratorWrapper<T>&& generator) {
+        return GeneratorWrapper<std::vector<T>>(
+            pf::make_unique<ChunkGenerator<T>>(size, std::move(generator))
+        );
+    }
+
+} // namespace Generators
+} // namespace Catch
