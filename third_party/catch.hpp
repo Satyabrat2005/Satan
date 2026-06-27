@@ -4899,3 +4899,64 @@ namespace Catch {
                     return "equals string: " + Catch::Detail::stringify( m_substr );
                 }
             };
+
+            struct Contains : StringHolder {
+                Contains( NSString* substr ) : StringHolder( substr ){}
+
+                bool match( NSString* str ) const override {
+                    return  (str != nil || m_substr == nil ) &&
+                            [str rangeOfString:m_substr].location != NSNotFound;
+                }
+
+                std::string describe() const override {
+                    return "contains string: " + Catch::Detail::stringify( m_substr );
+                }
+            };
+
+            struct StartsWith : StringHolder {
+                StartsWith( NSString* substr ) : StringHolder( substr ){}
+
+                bool match( NSString* str ) const override {
+                    return  (str != nil || m_substr == nil ) &&
+                            [str rangeOfString:m_substr].location == 0;
+                }
+
+                std::string describe() const override {
+                    return "starts with: " + Catch::Detail::stringify( m_substr );
+                }
+            };
+            struct EndsWith : StringHolder {
+                EndsWith( NSString* substr ) : StringHolder( substr ){}
+
+                bool match( NSString* str ) const override {
+                    return  (str != nil || m_substr == nil ) &&
+                            [str rangeOfString:m_substr].location == [str length] - [m_substr length];
+                }
+
+                std::string describe() const override {
+                    return "ends with: " + Catch::Detail::stringify( m_substr );
+                }
+            };
+
+        } // namespace NSStringMatchers
+        } // namespace Impl
+
+        inline Impl::NSStringMatchers::Equals
+            Equals( NSString* substr ){ return Impl::NSStringMatchers::Equals( substr ); }
+
+        inline Impl::NSStringMatchers::Contains
+            Contains( NSString* substr ){ return Impl::NSStringMatchers::Contains( substr ); }
+
+        inline Impl::NSStringMatchers::StartsWith
+            StartsWith( NSString* substr ){ return Impl::NSStringMatchers::StartsWith( substr ); }
+
+        inline Impl::NSStringMatchers::EndsWith
+            EndsWith( NSString* substr ){ return Impl::NSStringMatchers::EndsWith( substr ); }
+
+    } // namespace Matchers
+
+    using namespace Matchers;
+
+#endif // CATCH_CONFIG_DISABLE_MATCHERS
+
+} // namespace Catch
