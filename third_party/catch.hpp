@@ -424,3 +424,32 @@ namespace Catch {
 #if !defined(CATCH_INTERNAL_SUPPRESS_ZERO_VARIADIC_WARNINGS)
 #   define CATCH_INTERNAL_SUPPRESS_ZERO_VARIADIC_WARNINGS
 #endif
+// The goal of this macro is to avoid evaluation of the arguments, but
+// still have the compiler warn on problems inside...
+#if !defined(CATCH_INTERNAL_IGNORE_BUT_WARN)
+#   define CATCH_INTERNAL_IGNORE_BUT_WARN(...)
+#endif
+
+#if defined(__APPLE__) && defined(__apple_build_version__) && (__clang_major__ < 10)
+#   undef CATCH_INTERNAL_SUPPRESS_UNUSED_TEMPLATE_WARNINGS
+#elif defined(__clang__) && (__clang_major__ < 5)
+#   undef CATCH_INTERNAL_SUPPRESS_UNUSED_TEMPLATE_WARNINGS
+#endif
+
+#if !defined(CATCH_INTERNAL_SUPPRESS_UNUSED_TEMPLATE_WARNINGS)
+#   define CATCH_INTERNAL_SUPPRESS_UNUSED_TEMPLATE_WARNINGS
+#endif
+
+#if defined(CATCH_CONFIG_DISABLE_EXCEPTIONS)
+#define CATCH_TRY if ((true))
+#define CATCH_CATCH_ALL if ((false))
+#define CATCH_CATCH_ANON(type) if ((false))
+#else
+#define CATCH_TRY try
+#define CATCH_CATCH_ALL catch (...)
+#define CATCH_CATCH_ANON(type) catch (type)
+#endif
+
+#if defined(CATCH_INTERNAL_CONFIG_TRADITIONAL_MSVC_PREPROCESSOR) && !defined(CATCH_CONFIG_NO_TRADITIONAL_MSVC_PREPROCESSOR) && !defined(CATCH_CONFIG_TRADITIONAL_MSVC_PREPROCESSOR)
+#define CATCH_CONFIG_TRADITIONAL_MSVC_PREPROCESSOR
+#endif
