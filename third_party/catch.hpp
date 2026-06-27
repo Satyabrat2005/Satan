@@ -932,3 +932,37 @@ namespace Catch {
 namespace mpl_{
     struct na;
 }
+// end catch_meta.hpp
+namespace Catch {
+
+template<typename C>
+class TestInvokerAsMethod : public ITestInvoker {
+    void (C::*m_testAsMethod)();
+public:
+    TestInvokerAsMethod( void (C::*testAsMethod)() ) noexcept : m_testAsMethod( testAsMethod ) {}
+
+    void invoke() const override {
+        C obj;
+        (obj.*m_testAsMethod)();
+    }
+};
+
+auto makeTestInvoker( void(*testAsFunction)() ) noexcept -> ITestInvoker*;
+
+template<typename C>
+auto makeTestInvoker( void (C::*testAsMethod)() ) noexcept -> ITestInvoker* {
+    return new(std::nothrow) TestInvokerAsMethod<C>( testAsMethod );
+}
+
+struct NameAndTags {
+    NameAndTags( StringRef const& name_ = StringRef(), StringRef const& tags_ = StringRef() ) noexcept;
+    StringRef name;
+    StringRef tags;
+};
+
+struct AutoReg : NonCopyable {
+    AutoReg( ITestInvoker* invoker, SourceLineInfo const& lineInfo, StringRef const& classOrMethod, NameAndTags const& nameAndTags ) noexcept;
+    ~AutoReg();
+};
+
+} // end namespace Catch
