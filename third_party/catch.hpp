@@ -2142,3 +2142,42 @@ namespace Catch { \
         } \
     }; \
 }
+
+#define CATCH_REGISTER_ENUM( enumName, ... ) INTERNAL_CATCH_REGISTER_ENUM( enumName, __VA_ARGS__ )
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+// end catch_tostring.h
+#include <iosfwd>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4389) // '==' : signed/unsigned mismatch
+#pragma warning(disable:4018) // more "signed/unsigned mismatch"
+#pragma warning(disable:4312) // Converting int to T* using reinterpret_cast (issue on x64 platform)
+#pragma warning(disable:4180) // qualifier applied to function type has no meaning
+#pragma warning(disable:4800) // Forcing result to true or false
+#endif
+
+namespace Catch {
+
+    struct ITransientExpression {
+        auto isBinaryExpression() const -> bool { return m_isBinaryExpression; }
+        auto getResult() const -> bool { return m_result; }
+        virtual void streamReconstructedExpression( std::ostream &os ) const = 0;
+
+        ITransientExpression( bool isBinaryExpression, bool result )
+        :   m_isBinaryExpression( isBinaryExpression ),
+            m_result( result )
+        {}
+
+        // We don't actually need a virtual destructor, but many static analysers
+        // complain if it's not here :-(
+        virtual ~ITransientExpression();
+
+        bool m_isBinaryExpression;
+        bool m_result;
+
+    };
