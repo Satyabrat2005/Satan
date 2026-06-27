@@ -2587,3 +2587,54 @@ namespace Catch {
 
         ReusableStringStream m_stream;
     };
+
+    struct MessageBuilder : MessageStream {
+        MessageBuilder( StringRef const& macroName,
+                        SourceLineInfo const& lineInfo,
+                        ResultWas::OfType type );
+
+        template<typename T>
+        MessageBuilder& operator << ( T const& value ) {
+            m_stream << value;
+            return *this;
+        }
+
+        MessageInfo m_info;
+    };
+
+    class ScopedMessage {
+    public:
+        explicit ScopedMessage( MessageBuilder const& builder );
+        ScopedMessage( ScopedMessage& duplicate ) = delete;
+        ScopedMessage( ScopedMessage&& old );
+        ~ScopedMessage();
+
+        MessageInfo m_info;
+        bool m_moved;
+    };
+
+    class Capturer {
+        std::vector<MessageInfo> m_messages;
+        IResultCapture& m_resultCapture = getResultCapture();
+        size_t m_captured = 0;
+    public:
+        Capturer( StringRef macroName, SourceLineInfo const& lineInfo, ResultWas::OfType resultType, StringRef names );
+        ~Capturer();
+
+        void captureValue( size_t index, std::string const& value );
+
+        template<typename T>
+        void captureValues( size_t index, T const& value ) {
+            captureValue( index, Catch::Detail::stringify( value ) );
+        }
+
+        template<typename T, typename... Ts>
+        void captureValues( size_t index, T const& value, Ts const&... values ) {
+            captureValue( index, Catch::Detail::stringify(value) );
+            captureValues( index+1, values... );
+        }
+    };
+
+} // end namespace Catch
+
+// end catch_message.h
