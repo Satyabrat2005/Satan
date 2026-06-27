@@ -1459,3 +1459,46 @@ namespace Catch {
 } // Catch
 
 // end catch_interfaces_enum_values_registry.h
+#ifdef CATCH_CONFIG_CPP17_STRING_VIEW
+#include <string_view>
+#endif
+
+#ifdef __OBJC__
+// start catch_objc_arc.hpp
+
+#import <Foundation/Foundation.h>
+
+#ifdef __has_feature
+#define CATCH_ARC_ENABLED __has_feature(objc_arc)
+#else
+#define CATCH_ARC_ENABLED 0
+#endif
+
+void arcSafeRelease( NSObject* obj );
+id performOptionalSelector( id obj, SEL sel );
+
+#if !CATCH_ARC_ENABLED
+inline void arcSafeRelease( NSObject* obj ) {
+    [obj release];
+}
+inline id performOptionalSelector( id obj, SEL sel ) {
+    if( [obj respondsToSelector: sel] )
+        return [obj performSelector: sel];
+    return nil;
+}
+#define CATCH_UNSAFE_UNRETAINED
+#define CATCH_ARC_STRONG
+#else
+inline void arcSafeRelease( NSObject* ){}
+inline id performOptionalSelector( id obj, SEL sel ) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+#endif
+    if( [obj respondsToSelector: sel] )
+        return [obj performSelector: sel];
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+    return nil;
+}
