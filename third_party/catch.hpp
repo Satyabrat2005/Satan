@@ -3315,3 +3315,40 @@ namespace Matchers {
 
             std::vector<MatcherBase<ArgT> const*> m_matchers;
         };
+
+        template<typename ArgT>
+        struct MatchNotOf : MatcherBase<ArgT> {
+
+            MatchNotOf( MatcherBase<ArgT> const& underlyingMatcher ) : m_underlyingMatcher( underlyingMatcher ) {}
+
+            bool match( ArgT const& arg ) const override {
+                return !m_underlyingMatcher.match( arg );
+            }
+
+            std::string describe() const override {
+                return "not " + m_underlyingMatcher.toString();
+            }
+            MatcherBase<ArgT> const& m_underlyingMatcher;
+        };
+
+        template<typename T>
+        MatchAllOf<T> MatcherBase<T>::operator && ( MatcherBase const& other ) const {
+            return MatchAllOf<T>() && *this && other;
+        }
+        template<typename T>
+        MatchAnyOf<T> MatcherBase<T>::operator || ( MatcherBase const& other ) const {
+            return MatchAnyOf<T>() || *this || other;
+        }
+        template<typename T>
+        MatchNotOf<T> MatcherBase<T>::operator ! () const {
+            return MatchNotOf<T>( *this );
+        }
+
+    } // namespace Impl
+
+} // namespace Matchers
+
+using namespace Matchers;
+using Matchers::Impl::MatcherBase;
+
+} // namespace Catch
