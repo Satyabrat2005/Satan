@@ -5439,3 +5439,57 @@ namespace Catch {
         }
         bool used = false;
     };
+
+    struct TestRunInfo {
+        TestRunInfo( std::string const& _name );
+        std::string name;
+    };
+    struct GroupInfo {
+        GroupInfo(  std::string const& _name,
+                    std::size_t _groupIndex,
+                    std::size_t _groupsCount );
+
+        std::string name;
+        std::size_t groupIndex;
+        std::size_t groupsCounts;
+    };
+
+    struct AssertionStats {
+        AssertionStats( AssertionResult const& _assertionResult,
+                        std::vector<MessageInfo> const& _infoMessages,
+                        Totals const& _totals );
+
+        AssertionStats( AssertionStats const& )              = default;
+        AssertionStats( AssertionStats && )                  = default;
+        AssertionStats& operator = ( AssertionStats const& ) = delete;
+        AssertionStats& operator = ( AssertionStats && )     = delete;
+        virtual ~AssertionStats();
+
+        AssertionResult assertionResult;
+        std::vector<MessageInfo> infoMessages;
+        Totals totals;
+    };
+
+    struct SectionStats {
+        SectionStats(   SectionInfo const& _sectionInfo,
+                        Counts const& _assertions,
+                        double _durationInSeconds,
+                        bool _missingAssertions );
+        SectionStats( SectionStats const& )              = default;
+        SectionStats( SectionStats && )                  = default;
+        SectionStats& operator = ( SectionStats const& ) = default;
+        SectionStats& operator = ( SectionStats && )     = default;
+        virtual ~SectionStats();
+
+        SectionInfo sectionInfo;
+        Counts assertions;
+        double durationInSeconds;
+        bool missingAssertions;
+    };
+
+    struct TestCaseStats {
+        TestCaseStats(  TestCaseInfo const& _testInfo,
+                        Totals const& _totals,
+                        std::string const& _stdOut,
+                        std::string const& _stdErr,
+                        bool _aborting );
