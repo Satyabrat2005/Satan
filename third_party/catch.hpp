@@ -1502,3 +1502,39 @@ inline id performOptionalSelector( id obj, SEL sel ) {
 #endif
     return nil;
 }
+#define CATCH_UNSAFE_UNRETAINED __unsafe_unretained
+#define CATCH_ARC_STRONG __strong
+#endif
+
+// end catch_objc_arc.hpp
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4180) // We attempt to stream a function (address) by const&, which MSVC complains about but is harmless
+#endif
+
+namespace Catch {
+    namespace Detail {
+
+        extern const std::string unprintableString;
+
+        std::string rawMemoryToString( const void *object, std::size_t size );
+
+        template<typename T>
+        std::string rawMemoryToString( const T& object ) {
+          return rawMemoryToString( &object, sizeof(object) );
+        }
+
+        template<typename T>
+        class IsStreamInsertable {
+            template<typename Stream, typename U>
+            static auto test(int)
+                -> decltype(std::declval<Stream&>() << std::declval<U>(), std::true_type());
+
+            template<typename, typename>
+            static auto test(...)->std::false_type;
+
+        public:
+            static const bool value = decltype(test<std::ostream, const T&>(0))::value;
+        };
