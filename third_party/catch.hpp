@@ -527,3 +527,62 @@ namespace Catch {
         return value;
     }
 }
+#define CATCH_INTERNAL_LINEINFO \
+    ::Catch::SourceLineInfo( __FILE__, static_cast<std::size_t>( __LINE__ ) )
+
+// end catch_common.h
+namespace Catch {
+
+    struct RegistrarForTagAliases {
+        RegistrarForTagAliases( char const* alias, char const* tag, SourceLineInfo const& lineInfo );
+    };
+
+} // end namespace Catch
+
+#define CATCH_REGISTER_TAG_ALIAS( alias, spec ) \
+    CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+    CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+    namespace{ Catch::RegistrarForTagAliases INTERNAL_CATCH_UNIQUE_NAME( AutoRegisterTagAlias )( alias, spec, CATCH_INTERNAL_LINEINFO ); } \
+    CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
+
+// end catch_tag_alias_autoregistrar.h
+// start catch_test_registry.h
+
+// start catch_interfaces_testcase.h
+
+#include <vector>
+
+namespace Catch {
+
+    class TestSpec;
+
+    struct ITestInvoker {
+        virtual void invoke () const = 0;
+        virtual ~ITestInvoker();
+    };
+
+    class TestCase;
+    struct IConfig;
+
+    struct ITestCaseRegistry {
+        virtual ~ITestCaseRegistry();
+        virtual std::vector<TestCase> const& getAllTests() const = 0;
+        virtual std::vector<TestCase> const& getAllTestsSorted( IConfig const& config ) const = 0;
+    };
+
+    bool isThrowSafe( TestCase const& testCase, IConfig const& config );
+    bool matchTest( TestCase const& testCase, TestSpec const& testSpec, IConfig const& config );
+    std::vector<TestCase> filterTests( std::vector<TestCase> const& testCases, TestSpec const& testSpec, IConfig const& config );
+    std::vector<TestCase> const& getAllTestCasesSorted( IConfig const& config );
+
+}
+
+// end catch_interfaces_testcase.h
+// start catch_stringref.h
+
+#include <cstddef>
+#include <string>
+#include <iosfwd>
+#include <cassert>
+
+namespace Catch {
