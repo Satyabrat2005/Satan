@@ -586,3 +586,36 @@ namespace Catch {
 #include <cassert>
 
 namespace Catch {
+
+     /// A non-owning string class (similar to the forthcoming std::string_view)
+    /// Note that, because a StringRef may be a substring of another string,
+    /// it may not be null terminated.
+    class StringRef {
+    public:
+        using size_type = std::size_t;
+        using const_iterator = const char*;
+
+    private:
+        static constexpr char const* const s_empty = "";
+
+        char const* m_start = s_empty;
+        size_type m_size = 0;
+
+    public: // construction
+        constexpr StringRef() noexcept = default;
+
+        StringRef( char const* rawChars ) noexcept;
+
+        constexpr StringRef( char const* rawChars, size_type size ) noexcept
+        :   m_start( rawChars ),
+            m_size( size )
+        {}
+
+        StringRef( std::string const& stdString ) noexcept
+        :   m_start( stdString.c_str() ),
+            m_size( stdString.size() )
+        {}
+
+        explicit operator std::string() const {
+            return std::string(m_start, m_size);
+        }
