@@ -2700,3 +2700,48 @@ namespace Catch {
         } \
         INTERNAL_CATCH_REACT( catchAssertionHandler ) \
     } while( false )
+
+///////////////////////////////////////////////////////////////////////////////
+#define INTERNAL_CATCH_THROWS( macroName, resultDisposition, ... ) \
+    do { \
+        Catch::AssertionHandler catchAssertionHandler( macroName##_catch_sr, CATCH_INTERNAL_LINEINFO, CATCH_INTERNAL_STRINGIFY(__VA_ARGS__), resultDisposition); \
+        if( catchAssertionHandler.allowThrows() ) \
+            try { \
+                static_cast<void>(__VA_ARGS__); \
+                catchAssertionHandler.handleUnexpectedExceptionNotThrown(); \
+            } \
+            catch( ... ) { \
+                catchAssertionHandler.handleExceptionThrownAsExpected(); \
+            } \
+        else \
+            catchAssertionHandler.handleThrowingCallSkipped(); \
+        INTERNAL_CATCH_REACT( catchAssertionHandler ) \
+    } while( false )
+
+///////////////////////////////////////////////////////////////////////////////
+#define INTERNAL_CATCH_THROWS_AS( macroName, exceptionType, resultDisposition, expr ) \
+    do { \
+        Catch::AssertionHandler catchAssertionHandler( macroName##_catch_sr, CATCH_INTERNAL_LINEINFO, CATCH_INTERNAL_STRINGIFY(expr) ", " CATCH_INTERNAL_STRINGIFY(exceptionType), resultDisposition ); \
+        if( catchAssertionHandler.allowThrows() ) \
+            try { \
+                static_cast<void>(expr); \
+                catchAssertionHandler.handleUnexpectedExceptionNotThrown(); \
+            } \
+            catch( exceptionType const& ) { \
+                catchAssertionHandler.handleExceptionThrownAsExpected(); \
+            } \
+            catch( ... ) { \
+                catchAssertionHandler.handleUnexpectedInflightException(); \
+            } \
+        else \
+            catchAssertionHandler.handleThrowingCallSkipped(); \
+        INTERNAL_CATCH_REACT( catchAssertionHandler ) \
+    } while( false )
+
+///////////////////////////////////////////////////////////////////////////////
+#define INTERNAL_CATCH_MSG( macroName, messageType, resultDisposition, ... ) \
+    do { \
+        Catch::AssertionHandler catchAssertionHandler( macroName##_catch_sr, CATCH_INTERNAL_LINEINFO, Catch::StringRef(), resultDisposition ); \
+        catchAssertionHandler.handleMessage( messageType, ( Catch::MessageStream() << __VA_ARGS__ + ::Catch::StreamEndStop() ).m_stream.str() ); \
+        INTERNAL_CATCH_REACT( catchAssertionHandler ) \
+    } while( false )
