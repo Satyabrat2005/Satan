@@ -3608,3 +3608,39 @@ namespace Matchers {
             }
             std::vector<T, AllocComp> const& m_comparator;
         };
+
+        template<typename T, typename AllocComp, typename AllocMatch>
+        struct ApproxMatcher : MatcherBase<std::vector<T, AllocMatch>> {
+
+            ApproxMatcher(std::vector<T, AllocComp> const& comparator) : m_comparator( comparator ) {}
+
+            bool match(std::vector<T, AllocMatch> const &v) const override {
+                if (m_comparator.size() != v.size())
+                    return false;
+                for (std::size_t i = 0; i < v.size(); ++i)
+                    if (m_comparator[i] != approx(v[i]))
+                        return false;
+                return true;
+            }
+            std::string describe() const override {
+                return "is approx: " + ::Catch::Detail::stringify( m_comparator );
+            }
+            template <typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+            ApproxMatcher& epsilon( T const& newEpsilon ) {
+                approx.epsilon(newEpsilon);
+                return *this;
+            }
+            template <typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+            ApproxMatcher& margin( T const& newMargin ) {
+                approx.margin(newMargin);
+                return *this;
+            }
+            template <typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
+            ApproxMatcher& scale( T const& newScale ) {
+                approx.scale(newScale);
+                return *this;
+            }
+
+            std::vector<T, AllocComp> const& m_comparator;
+            mutable Catch::Detail::Approx approx = Catch::Detail::Approx::custom();
+        };
