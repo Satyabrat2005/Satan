@@ -3513,3 +3513,45 @@ public:
         };
 
     } // namespace StdString
+
+    // The following functions create the actual matcher objects.
+    // This allows the types to be inferred
+
+    StdString::EqualsMatcher Equals( std::string const& str, CaseSensitive::Choice caseSensitivity = CaseSensitive::Yes );
+    StdString::ContainsMatcher Contains( std::string const& str, CaseSensitive::Choice caseSensitivity = CaseSensitive::Yes );
+    StdString::EndsWithMatcher EndsWith( std::string const& str, CaseSensitive::Choice caseSensitivity = CaseSensitive::Yes );
+    StdString::StartsWithMatcher StartsWith( std::string const& str, CaseSensitive::Choice caseSensitivity = CaseSensitive::Yes );
+    StdString::RegexMatcher Matches( std::string const& regex, CaseSensitive::Choice caseSensitivity = CaseSensitive::Yes );
+
+} // namespace Matchers
+} // namespace Catch
+
+// end catch_matchers_string.h
+// start catch_matchers_vector.h
+
+#include <algorithm>
+
+namespace Catch {
+namespace Matchers {
+
+    namespace Vector {
+        template<typename T, typename Alloc>
+        struct ContainsElementMatcher : MatcherBase<std::vector<T, Alloc>> {
+
+            ContainsElementMatcher(T const &comparator) : m_comparator( comparator) {}
+
+            bool match(std::vector<T, Alloc> const &v) const override {
+                for (auto const& el : v) {
+                    if (el == m_comparator) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            std::string describe() const override {
+                return "Contains: " + ::Catch::Detail::stringify( m_comparator );
+            }
+
+            T const& m_comparator;
+        };
