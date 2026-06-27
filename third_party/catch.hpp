@@ -3283,3 +3283,35 @@ namespace Matchers {
         };
         template<typename ArgT>
         struct MatchAnyOf : MatcherBase<ArgT> {
+
+            bool match( ArgT const& arg ) const override {
+                for( auto matcher : m_matchers ) {
+                    if (matcher->match(arg))
+                        return true;
+                }
+                return false;
+            }
+            std::string describe() const override {
+                std::string description;
+                description.reserve( 4 + m_matchers.size()*32 );
+                description += "( ";
+                bool first = true;
+                for( auto matcher : m_matchers ) {
+                    if( first )
+                        first = false;
+                    else
+                        description += " or ";
+                    description += matcher->toString();
+                }
+                description += " )";
+                return description;
+            }
+
+            MatchAnyOf<ArgT> operator || ( MatcherBase<ArgT> const& other ) {
+                auto copy(*this);
+                copy.m_matchers.push_back( &other );
+                return copy;
+            }
+
+            std::vector<MatcherBase<ArgT> const*> m_matchers;
+        };
