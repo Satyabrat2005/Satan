@@ -823,3 +823,43 @@ constexpr auto operator "" _catch_sr( char const* rawChars, std::size_t size ) n
 #define INTERNAL_CATCH_DEFINE_SIG_TEST_X(TestName, signature,...)\
     template<INTERNAL_CATCH_REMOVE_PARENS(signature)>\
     static void TestName()
+#define INTERNAL_CATCH_NTTP_REGISTER0(TestFunc, signature)\
+    template<typename Type>\
+    void reg_test(TypeList<Type>, Catch::NameAndTags nameAndTags)\
+    {\
+        Catch::AutoReg( Catch::makeTestInvoker(&TestFunc<Type>), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), nameAndTags);\
+    }
+
+#define INTERNAL_CATCH_NTTP_REGISTER(TestFunc, signature, ...)\
+    template<INTERNAL_CATCH_REMOVE_PARENS(signature)>\
+    void reg_test(Nttp<__VA_ARGS__>, Catch::NameAndTags nameAndTags)\
+    {\
+        Catch::AutoReg( Catch::makeTestInvoker(&TestFunc<__VA_ARGS__>), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), nameAndTags);\
+    }
+
+#define INTERNAL_CATCH_NTTP_REGISTER_METHOD0(TestName, signature, ...)\
+    template<typename Type>\
+    void reg_test(TypeList<Type>, Catch::StringRef className, Catch::NameAndTags nameAndTags)\
+    {\
+        Catch::AutoReg( Catch::makeTestInvoker(&TestName<Type>::test), CATCH_INTERNAL_LINEINFO, className, nameAndTags);\
+    }
+
+#define INTERNAL_CATCH_NTTP_REGISTER_METHOD(TestName, signature, ...)\
+    template<INTERNAL_CATCH_REMOVE_PARENS(signature)>\
+    void reg_test(Nttp<__VA_ARGS__>, Catch::StringRef className, Catch::NameAndTags nameAndTags)\
+    {\
+        Catch::AutoReg( Catch::makeTestInvoker(&TestName<__VA_ARGS__>::test), CATCH_INTERNAL_LINEINFO, className, nameAndTags);\
+    }
+
+#define INTERNAL_CATCH_DECLARE_SIG_TEST_METHOD0(TestName, ClassName)
+#define INTERNAL_CATCH_DECLARE_SIG_TEST_METHOD1(TestName, ClassName, signature)\
+    template<typename TestType> \
+    struct TestName : INTERNAL_CATCH_REMOVE_PARENS(ClassName)<TestType> { \
+        void test();\
+    }
+
+#define INTERNAL_CATCH_DECLARE_SIG_TEST_METHOD_X(TestName, ClassName, signature, ...)\
+    template<INTERNAL_CATCH_REMOVE_PARENS(signature)> \
+    struct TestName : INTERNAL_CATCH_REMOVE_PARENS(ClassName)<__VA_ARGS__> { \
+        void test();\
+    }
