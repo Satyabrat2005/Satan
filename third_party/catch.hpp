@@ -4820,3 +4820,82 @@ namespace Catch {
         Class m_cls;
         SEL m_sel;
     };
+
+    namespace Detail{
+
+        inline std::string getAnnotation(   Class cls,
+                                            std::string const& annotationName,
+                                            std::string const& testCaseName ) {
+            NSString* selStr = [[NSString alloc] initWithFormat:@"Catch_%s_%s", annotationName.c_str(), testCaseName.c_str()];
+            SEL sel = NSSelectorFromString( selStr );
+            arcSafeRelease( selStr );
+            id value = performOptionalSelector( cls, sel );
+            if( value )
+                return [(NSString*)value UTF8String];
+            return "";
+        }
+    }
+
+    inline std::size_t registerTestMethods() {
+        std::size_t noTestMethods = 0;
+        int noClasses = objc_getClassList( nullptr, 0 );
+
+        Class* classes = (CATCH_UNSAFE_UNRETAINED Class *)malloc( sizeof(Class) * noClasses);
+        objc_getClassList( classes, noClasses );
+
+        for( int c = 0; c < noClasses; c++ ) {
+            Class cls = classes[c];
+            {
+                u_int count;
+                Method* methods = class_copyMethodList( cls, &count );
+                for( u_int m = 0; m < count ; m++ ) {
+                    SEL selector = method_getName(methods[m]);
+                    std::string methodName = sel_getName(selector);
+                    if( startsWith( methodName, "Catch_TestCase_" ) ) {
+                        std::string testCaseName = methodName.substr( 15 );
+                        std::string name = Detail::getAnnotation( cls, "Name", testCaseName );
+                        std::string desc = Detail::getAnnotation( cls, "Description", testCaseName );
+                        const char* className = class_getName( cls );
+
+                        getMutableRegistryHub().registerTest( makeTestCase( new OcMethod( cls, selector ), className, NameAndTags( name.c_str(), desc.c_str() ), SourceLineInfo("",0) ) );
+                        noTestMethods++;
+                    }
+                }
+                free(methods);
+            }
+        }
+        return noTestMethods;
+    }
+
+#if !defined(CATCH_CONFIG_DISABLE_MATCHERS)
+
+    namespace Matchers {
+        namespace Impl {
+        namespace NSStringMatchers {
+
+            struct StringHolder : MatcherBase<NSString*>{
+                StringHolder( NSString* substr ) : m_substr( [substr copy] ){}
+                StringHolder( StringHolder const& other ) : m_substr( [other.m_substr copy] ){}
+                StringHolder() {
+                    arcSafeRelease( m_substr );
+                }
+
+                bool match( NSString* str ) const override {
+                    return false;
+                }
+
+                NSString* CATCH_ARC_STRONG m_substr;
+            };
+
+            struct Equals : StringHolder {
+                Equals( NSString* substr ) : StringHolder( substr ){}
+
+                bool match( NSString* str ) const override {
+                    return  (str != nil || m_substr == nil ) &&
+                            [str isEqualToString:m_substr];
+                }
+
+                std::string describe() const override {
+                    return "equals string: " + Catch::Detail::stringify( m_substr );
+                }
+            };
