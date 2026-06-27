@@ -3129,3 +3129,28 @@ namespace Detail {
             m_scale = static_cast<double>(newScale);
             return *this;
         }
+
+        std::string toString() const;
+
+    private:
+        double m_epsilon;
+        double m_margin;
+        double m_scale;
+        double m_value;
+    };
+} // end namespace Detail
+
+namespace literals {
+    Detail::Approx operator "" _a(long double val);
+    Detail::Approx operator "" _a(unsigned long long val);
+} // end namespace literals
+
+template<>
+struct StringMaker<Catch::Detail::Approx> {
+    static std::string convert(Catch::Detail::Approx const& value);
+};
+
+} // end namespace Catch
+
+// end catch_approx.h
+// start catch_string_manip.h
