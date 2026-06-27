@@ -4152,3 +4152,60 @@ namespace Generators {
             }
             return m_returned[m_repeat_index];
         }
+
+        bool next() override {
+            // There are 2 basic cases:
+            // 1) We are still reading the generator
+            // 2) We are reading our own cache
+
+            // In the first case, we need to poke the underlying generator.
+            // If it happily moves, we are left in that state, otherwise it is time to start reading from our cache
+            if (m_current_repeat == 0) {
+                const auto success = m_generator.next();
+                if (!success) {
+                    ++m_current_repeat;
+                }
+                return m_current_repeat < m_target_repeats;
+            }
+
+            // In the second case, we need to move indices forward and check that we haven't run up against the end
+            ++m_repeat_index;
+            if (m_repeat_index == m_returned.size()) {
+                m_repeat_index = 0;
+                ++m_current_repeat;
+            }
+            return m_current_repeat < m_target_repeats;
+        }
+    };
+
+    template <typename T>
+    GeneratorWrapper<T> repeat(size_t repeats, GeneratorWrapper<T>&& generator) {
+        return GeneratorWrapper<T>(pf::make_unique<RepeatGenerator<T>>(repeats, std::move(generator)));
+    }
+
+    template <typename T, typename U, typename Func>
+    class MapGenerator : public IGenerator<T> {
+        // TBD: provide static assert for mapping function, for friendly error message
+        GeneratorWrapper<U> m_generator;
+        Func m_function;
+        // To avoid returning dangling reference, we have to save the values
+        T m_cache;
+    public:
+        template <typename F2 = Func>
+        MapGenerator(F2&& function, GeneratorWrapper<U>&& generator) :
+            m_generator(std::move(generator)),
+            m_function(std::forward<F2>(function)),
+            m_cache(m_function(m_generator.get()))
+        {}
+
+        T const& get() const override {
+            return m_cache;
+        }
+        bool next() override {
+            const auto success = m_generator.next();
+            if (success) {
+                m_cache = m_function(m_generator.get());
+            }
+            return success;
+        }
+    };
