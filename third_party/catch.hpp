@@ -1538,3 +1538,26 @@ namespace Catch {
         public:
             static const bool value = decltype(test<std::ostream, const T&>(0))::value;
         };
+
+        template<typename E>
+        std::string convertUnknownEnumToString( E e );
+
+        template<typename T>
+        typename std::enable_if<
+            !std::is_enum<T>::value && !std::is_base_of<std::exception, T>::value,
+        std::string>::type convertUnstreamable( T const& ) {
+            return Detail::unprintableString;
+        }
+        template<typename T>
+        typename std::enable_if<
+            !std::is_enum<T>::value && std::is_base_of<std::exception, T>::value,
+         std::string>::type convertUnstreamable(T const& ex) {
+            return ex.what();
+        }
+
+        template<typename T>
+        typename std::enable_if<
+            std::is_enum<T>::value
+        , std::string>::type convertUnstreamable( T const& value ) {
+            return convertUnknownEnumToString( value );
+        }
