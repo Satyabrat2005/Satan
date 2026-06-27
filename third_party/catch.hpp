@@ -306,3 +306,39 @@ namespace Catch {
 #if !defined(_GLIBCXX_USE_C99_MATH_TR1)
 #define CATCH_INTERNAL_CONFIG_GLOBAL_NEXTAFTER
 #endif
+// Various stdlib support checks that require __has_include
+#if defined(__has_include)
+  // Check if string_view is available and usable
+  #if __has_include(<string_view>) && defined(CATCH_CPP17_OR_GREATER)
+  #    define CATCH_INTERNAL_CONFIG_CPP17_STRING_VIEW
+  #endif
+
+  // Check if optional is available and usable
+  #  if __has_include(<optional>) && defined(CATCH_CPP17_OR_GREATER)
+  #    define CATCH_INTERNAL_CONFIG_CPP17_OPTIONAL
+  #  endif // __has_include(<optional>) && defined(CATCH_CPP17_OR_GREATER)
+
+  // Check if byte is available and usable
+  #  if __has_include(<cstddef>) && defined(CATCH_CPP17_OR_GREATER)
+  #    include <cstddef>
+  #    if defined(__cpp_lib_byte) && (__cpp_lib_byte > 0)
+  #      define CATCH_INTERNAL_CONFIG_CPP17_BYTE
+  #    endif
+  #  endif // __has_include(<cstddef>) && defined(CATCH_CPP17_OR_GREATER)
+
+  // Check if variant is available and usable
+  #  if __has_include(<variant>) && defined(CATCH_CPP17_OR_GREATER)
+  #    if defined(__clang__) && (__clang_major__ < 8)
+         // work around clang bug with libstdc++ https://bugs.llvm.org/show_bug.cgi?id=31852
+         // fix should be in clang 8, workaround in libstdc++ 8.2
+  #      include <ciso646>
+  #      if defined(__GLIBCXX__) && defined(_GLIBCXX_RELEASE) && (_GLIBCXX_RELEASE < 9)
+  #        define CATCH_CONFIG_NO_CPP17_VARIANT
+  #      else
+  #        define CATCH_INTERNAL_CONFIG_CPP17_VARIANT
+  #      endif // defined(__GLIBCXX__) && defined(_GLIBCXX_RELEASE) && (_GLIBCXX_RELEASE < 9)
+  #    else
+  #      define CATCH_INTERNAL_CONFIG_CPP17_VARIANT
+  #    endif // defined(__clang__) && (__clang_major__ < 8)
+  #  endif // __has_include(<variant>) && defined(CATCH_CPP17_OR_GREATER)
+#endif // defined(__has_include)
