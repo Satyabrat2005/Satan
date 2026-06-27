@@ -1,0 +1,15 @@
+// ============================================
+//  CONFIGURABLE TRAINING PARAMS — SATAN ML
+// ============================================
+
+let data = load_csv("data.csv");
+
+// Test 1: Custom test_size (70/30 split) and 10-fold CV
+let model = RandomForest();
+model.fit(data, test_size=0.3, cv=10);
+summon "Score: " + str(model.score());
+
+// Test 2: Linear regression with 90/10 split
+let lr = LinearRegression();
+lr.fit(data, test_size=0.1, cv=3);
+summon "LR Score: " + str(lr.score());
