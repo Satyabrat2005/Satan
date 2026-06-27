@@ -3821,3 +3821,61 @@ namespace Catch {
     void throw_runtime_error(std::string const& msg);
 
 } // namespace Catch;
+
+#define CATCH_MAKE_MSG(...) \
+    (Catch::ReusableStringStream() << __VA_ARGS__).str()
+
+#define CATCH_INTERNAL_ERROR(...) \
+    Catch::throw_logic_error(CATCH_MAKE_MSG( CATCH_INTERNAL_LINEINFO << ": Internal Catch2 error: " << __VA_ARGS__))
+
+#define CATCH_ERROR(...) \
+    Catch::throw_domain_error(CATCH_MAKE_MSG( __VA_ARGS__ ))
+
+#define CATCH_RUNTIME_ERROR(...) \
+    Catch::throw_runtime_error(CATCH_MAKE_MSG( __VA_ARGS__ ))
+
+#define CATCH_ENFORCE( condition, ... ) \
+    do{ if( !(condition) ) CATCH_ERROR( __VA_ARGS__ ); } while(false)
+
+// end catch_enforce.h
+#include <memory>
+#include <vector>
+#include <cassert>
+
+#include <utility>
+#include <exception>
+
+namespace Catch {
+
+class GeneratorException : public std::exception {
+    const char* const m_msg = "";
+
+public:
+    GeneratorException(const char* msg):
+        m_msg(msg)
+    {}
+
+    const char* what() const noexcept override final;
+};
+
+namespace Generators {
+
+    // !TBD move this into its own location?
+    namespace pf{
+        template<typename T, typename... Args>
+        std::unique_ptr<T> make_unique( Args&&... args ) {
+            return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+        }
+    }
+
+    template<typename T>
+    struct IGenerator : GeneratorUntypedBase {
+        virtual ~IGenerator() = default;
+
+        // Returns the current element of the generator
+        //
+        // \Precondition The generator is either freshly constructed,
+        // or the last call to `next()` returned true
+        virtual T const& get() const = 0;
+        using type = T;
+    };
