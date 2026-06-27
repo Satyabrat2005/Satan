@@ -4269,3 +4269,66 @@ namespace Generators {
 
 } // namespace Generators
 } // namespace Catch
+
+// end catch_generators_generic.hpp
+// start catch_generators_specific.hpp
+
+// start catch_context.h
+
+#include <memory>
+
+namespace Catch {
+
+    struct IResultCapture;
+    struct IRunner;
+    struct IConfig;
+    struct IMutableContext;
+
+    using IConfigPtr = std::shared_ptr<IConfig const>;
+
+    struct IContext
+    {
+        virtual ~IContext();
+
+        virtual IResultCapture* getResultCapture() = 0;
+        virtual IRunner* getRunner() = 0;
+        virtual IConfigPtr const& getConfig() const = 0;
+    };
+
+    struct IMutableContext : IContext
+    {
+        virtual ~IMutableContext();
+        virtual void setResultCapture( IResultCapture* resultCapture ) = 0;
+        virtual void setRunner( IRunner* runner ) = 0;
+        virtual void setConfig( IConfigPtr const& config ) = 0;
+
+    private:
+        static IMutableContext *currentContext;
+        friend IMutableContext& getCurrentMutableContext();
+        friend void cleanUpContext();
+        static void createContext();
+    };
+
+    inline IMutableContext& getCurrentMutableContext()
+    {
+        if( !IMutableContext::currentContext )
+            IMutableContext::createContext();
+        // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.UndefReturn)
+        return *IMutableContext::currentContext;
+    }
+
+    inline IContext& getCurrentContext()
+    {
+        return getCurrentMutableContext();
+    }
+
+    void cleanUpContext();
+
+    class SimplePcg32;
+    SimplePcg32& rng();
+}
+
+// end catch_context.h
+// start catch_interfaces_config.h
+
+// start catch_option.hpp
