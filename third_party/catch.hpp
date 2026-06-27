@@ -4960,3 +4960,57 @@ namespace Catch {
 #endif // CATCH_CONFIG_DISABLE_MATCHERS
 
 } // namespace Catch
+
+///////////////////////////////////////////////////////////////////////////////
+#define OC_MAKE_UNIQUE_NAME( root, uniqueSuffix ) root##uniqueSuffix
+#define OC_TEST_CASE2( name, desc, uniqueSuffix ) \
++(NSString*) OC_MAKE_UNIQUE_NAME( Catch_Name_test_, uniqueSuffix ) \
+{ \
+return @ name; \
+} \
++(NSString*) OC_MAKE_UNIQUE_NAME( Catch_Description_test_, uniqueSuffix ) \
+{ \
+return @ desc; \
+} \
+-(void) OC_MAKE_UNIQUE_NAME( Catch_TestCase_test_, uniqueSuffix )
+
+#define OC_TEST_CASE( name, desc ) OC_TEST_CASE2( name, desc, __LINE__ )
+
+// end catch_objc.hpp
+#endif
+
+// Benchmarking needs the externally-facing parts of reporters to work
+#if defined(CATCH_CONFIG_EXTERNAL_INTERFACES) || defined(CATCH_CONFIG_ENABLE_BENCHMARKING)
+// start catch_external_interfaces.h
+
+// start catch_reporter_bases.hpp
+
+// start catch_interfaces_reporter.h
+
+// start catch_config.hpp
+
+// start catch_test_spec_parser.h
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
+// start catch_test_spec.h
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
+// start catch_wildcard_pattern.h
+
+namespace Catch
+{
+    class WildcardPattern {
+        enum WildcardPosition {
+            NoWildcard = 0,
+            WildcardAtStart = 1,
+            WildcardAtEnd = 2,
+            WildcardAtBothEnds = WildcardAtStart | WildcardAtEnd
+        };
