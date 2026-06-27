@@ -2181,3 +2181,38 @@ namespace Catch {
         bool m_result;
 
     };
+
+    void formatReconstructedExpression( std::ostream &os, std::string const& lhs, StringRef op, std::string const& rhs );
+
+    template<typename LhsT, typename RhsT>
+    class BinaryExpr  : public ITransientExpression {
+        LhsT m_lhs;
+        StringRef m_op;
+        RhsT m_rhs;
+
+        void streamReconstructedExpression( std::ostream &os ) const override {
+            formatReconstructedExpression
+                    ( os, Catch::Detail::stringify( m_lhs ), m_op, Catch::Detail::stringify( m_rhs ) );
+        }
+
+    public:
+        BinaryExpr( bool comparisonResult, LhsT lhs, StringRef op, RhsT rhs )
+        :   ITransientExpression{ true, comparisonResult },
+            m_lhs( lhs ),
+            m_op( op ),
+            m_rhs( rhs )
+        {}
+
+        template<typename T>
+        auto operator && ( T ) const -> BinaryExpr<LhsT, RhsT const&> const {
+            static_assert(always_false<T>::value,
+            "chained comparisons are not supported inside assertions, "
+            "wrap the expression inside parentheses, or decompose it");
+        }
+
+        template<typename T>
+        auto operator || ( T ) const -> BinaryExpr<LhsT, RhsT const&> const {
+            static_assert(always_false<T>::value,
+            "chained comparisons are not supported inside assertions, "
+            "wrap the expression inside parentheses, or decompose it");
+        }
