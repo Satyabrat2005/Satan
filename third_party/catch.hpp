@@ -2016,3 +2016,48 @@ namespace Catch {
     };
 
 } // namespace Catch
+
+// Separate std::chrono::duration specialization
+#if defined(CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER)
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
+namespace Catch {
+
+template <class Ratio>
+struct ratio_string {
+    static std::string symbol();
+};
+
+template <class Ratio>
+std::string ratio_string<Ratio>::symbol() {
+    Catch::ReusableStringStream rss;
+    rss << '[' << Ratio::num << '/'
+        << Ratio::den << ']';
+    return rss.str();
+}
+template <>
+struct ratio_string<std::atto> {
+    static std::string symbol();
+};
+template <>
+struct ratio_string<std::femto> {
+    static std::string symbol();
+};
+template <>
+struct ratio_string<std::pico> {
+    static std::string symbol();
+};
+template <>
+struct ratio_string<std::nano> {
+    static std::string symbol();
+};
+template <>
+struct ratio_string<std::micro> {
+    static std::string symbol();
+};
+template <>
+struct ratio_string<std::milli> {
+    static std::string symbol();
+};
