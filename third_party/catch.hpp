@@ -5100,3 +5100,53 @@ namespace Catch {
         friend class TestSpecParser;
     };
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
+// end catch_test_spec.h
+// start catch_interfaces_tag_alias_registry.h
+
+#include <string>
+
+namespace Catch {
+
+    struct TagAlias;
+
+    struct ITagAliasRegistry {
+        virtual ~ITagAliasRegistry();
+        // Nullptr if not present
+        virtual TagAlias const* find( std::string const& alias ) const = 0;
+        virtual std::string expandAliases( std::string const& unexpandedTestSpec ) const = 0;
+
+        static ITagAliasRegistry const& get();
+    };
+
+} // end namespace Catch
+
+// end catch_interfaces_tag_alias_registry.h
+namespace Catch {
+
+    class TestSpecParser {
+        enum Mode{ None, Name, QuotedName, Tag, EscapedName };
+        Mode m_mode = None;
+        Mode lastMode = None;
+        bool m_exclusion = false;
+        std::size_t m_pos = 0;
+        std::size_t m_realPatternPos = 0;
+        std::string m_arg;
+        std::string m_substring;
+        std::string m_patternName;
+        std::vector<std::size_t> m_escapeChars;
+        TestSpec::Filter m_currentFilter;
+        TestSpec m_testSpec;
+        ITagAliasRegistry const* m_tagAliases = nullptr;
+
+    public:
+        TestSpecParser( ITagAliasRegistry const& tagAliases );
+
+        TestSpecParser& parse( std::string const& arg );
+        TestSpec testSpec();
+
+    private:
