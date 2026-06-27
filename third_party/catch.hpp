@@ -2532,3 +2532,58 @@ namespace Catch {
             handleExpr( expr.makeUnaryExpr() );
         }
         void handleExpr( ITransientExpression const& expr );
+
+        void handleMessage(ResultWas::OfType resultType, StringRef const& message);
+
+        void handleExceptionThrownAsExpected();
+        void handleUnexpectedExceptionNotThrown();
+        void handleExceptionNotThrownAsExpected();
+        void handleThrowingCallSkipped();
+        void handleUnexpectedInflightException();
+
+        void complete();
+        void setCompleted();
+
+        // query
+        auto allowThrows() const -> bool;
+    };
+
+    void handleExceptionMatchExpr( AssertionHandler& handler, std::string const& str, StringRef const& matcherString );
+
+} // namespace Catch
+
+// end catch_assertionhandler.h
+// start catch_message.h
+
+#include <string>
+#include <vector>
+
+namespace Catch {
+
+    struct MessageInfo {
+        MessageInfo(    StringRef const& _macroName,
+                        SourceLineInfo const& _lineInfo,
+                        ResultWas::OfType _type );
+
+        StringRef macroName;
+        std::string message;
+        SourceLineInfo lineInfo;
+        ResultWas::OfType type;
+        unsigned int sequence;
+
+        bool operator == ( MessageInfo const& other ) const;
+        bool operator < ( MessageInfo const& other ) const;
+    private:
+        static unsigned int globalCount;
+    };
+
+    struct MessageStream {
+
+        template<typename T>
+        MessageStream& operator << ( T const& value ) {
+            m_stream << value;
+            return *this;
+        }
+
+        ReusableStringStream m_stream;
+    };
