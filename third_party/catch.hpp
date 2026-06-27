@@ -1018,3 +1018,35 @@ struct AutoReg : NonCopyable {
             INTERNAL_CATCH_EXPAND_VARGS( INTERNAL_CATCH_TEMPLATE_TEST_CASE_METHOD_NO_REGISTRATION_2( INTERNAL_CATCH_UNIQUE_NAME( C_A_T_C_H_T_E_M_P_L_A_T_E_T_E_S_T_C_L_A_S_S_ ), INTERNAL_CATCH_UNIQUE_NAME( C_A_T_C_H_T_E_M_P_L_A_T_E_T_E_S_T_ ) , ClassName, Name, Tags, Signature, __VA_ARGS__ ) )
     #endif
 #endif
+     ///////////////////////////////////////////////////////////////////////////////
+         #define INTERNAL_CATCH_TESTCASE2( TestName, ... ) \
+             static void TestName(); \
+             CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+             CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+             namespace{ Catch::AutoReg INTERNAL_CATCH_UNIQUE_NAME( autoRegistrar )( Catch::makeTestInvoker( &TestName ), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), Catch::NameAndTags{ __VA_ARGS__ } ); } /* NOLINT */ \
+             CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION \
+             static void TestName()
+         #define INTERNAL_CATCH_TESTCASE( ... ) \
+             INTERNAL_CATCH_TESTCASE2( INTERNAL_CATCH_UNIQUE_NAME( C_A_T_C_H_T_E_S_T_ ), __VA_ARGS__ )
+     
+         ///////////////////////////////////////////////////////////////////////////////
+         #define INTERNAL_CATCH_METHOD_AS_TEST_CASE( QualifiedMethod, ... ) \
+             CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+             CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+             namespace{ Catch::AutoReg INTERNAL_CATCH_UNIQUE_NAME( autoRegistrar )( Catch::makeTestInvoker( &QualifiedMethod ), CATCH_INTERNAL_LINEINFO, "&" #QualifiedMethod, Catch::NameAndTags{ __VA_ARGS__ } ); } /* NOLINT */ \
+             CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
+     
+         ///////////////////////////////////////////////////////////////////////////////
+         #define INTERNAL_CATCH_TEST_CASE_METHOD2( TestName, ClassName, ... )\
+             CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
+             CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+             namespace{ \
+                 struct TestName : INTERNAL_CATCH_REMOVE_PARENS(ClassName) { \
+                     void test(); \
+                 }; \
+                 Catch::AutoReg INTERNAL_CATCH_UNIQUE_NAME( autoRegistrar ) ( Catch::makeTestInvoker( &TestName::test ), CATCH_INTERNAL_LINEINFO, #ClassName, Catch::NameAndTags{ __VA_ARGS__ } ); /* NOLINT */ \
+             } \
+             CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION \
+             void TestName::test()
+         #define INTERNAL_CATCH_TEST_CASE_METHOD( ClassName, ... ) \
+             INTERNAL_CATCH_TEST_CASE_METHOD2( INTERNAL_CATCH_UNIQUE_NAME( C_A_T_C_H_T_E_S_T_ ), ClassName, __VA_ARGS__ )
